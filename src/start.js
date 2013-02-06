@@ -7,4 +7,3 @@
 var pyfy = {};
 (function() {
 
-function ascending(a,b) { return +a-b;}
