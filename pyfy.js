@@ -101,6 +101,10 @@ var pyfy = {};
   Const.prototype.fn = function() {
     return this.const;
   };
+  Const.prototype.update = Const.prototype.set = function(d) {
+    this.const = d;
+    return this;
+  };
   function Data(d) {
     Base.apply(this, arguments);
     this.data = {};
@@ -252,8 +256,12 @@ var pyfy = {};
   Derived.prototype.rawDates = function() {
     return this.parent.rawDates.apply(this.parent, arguments);
   };
-  Derived.prototype.fn = function() {
-    return this.parent.fn.apply(this.parent, arguments);
+  Derived.prototype.fn = function(cache, d, i) {
+    return this.parent.fetch(cache, d, i).y;
+  };
+  Derived.prototype.setParent = function(d) {
+    this.parent = d;
+    return this;
   };
   pyfy.Filter = Filter;
   function Filter(d, min, max) {
@@ -356,6 +364,9 @@ var pyfy = {};
     },
     div: function(a, b) {
       return a / b;
+    },
+    pow: function(a, b) {
+      return Math.pow(a, b);
     }
   };
   Object.keys(ops).forEach(function(op) {

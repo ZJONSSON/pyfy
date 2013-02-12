@@ -1,6 +1,6 @@
 # Libraries
 
-NODEPATH ?= "../n3/node_modules"
+NODEPATH ?= "../dpl/node_modules"
 JS_UGLIFY = $(NODEPATH)/uglify-js2/bin/uglifyjs2
 
 all: \
