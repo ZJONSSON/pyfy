@@ -1,7 +1,7 @@
 pyfy.Max = Max;
 
-function Max(d) {
-  this.max =0;
+function Max(d,max) {
+  this.max = max || 0;
   Derived.call(this,d);
 }
 

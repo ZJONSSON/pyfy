@@ -69,8 +69,8 @@ Base.prototype.fetch = function(cache,d,i) {
 };
 
 [Cumul,Diff,Last,Max,Min,Neg].forEach(function(Fn) {
-  Base.prototype[Fn.name.toLowerCase()] = function() {
-    return new Fn(this);
+  Base.prototype[Fn.name.toLowerCase()] = function(d) {
+    return new Fn(this,d);
   };
 });
 

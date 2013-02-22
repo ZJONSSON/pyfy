@@ -74,8 +74,8 @@ var pyfy = {};
     return cache[this.ID][i];
   };
   [ Cumul, Diff, Last, Max, Min, Neg ].forEach(function(Fn) {
-    Base.prototype[Fn.name.toLowerCase()] = function() {
-      return new Fn(this);
+    Base.prototype[Fn.name.toLowerCase()] = function(d) {
+      return new Fn(this, d);
     };
   });
   Base.prototype.pv = function(curve, date, cache) {
@@ -326,8 +326,8 @@ var pyfy = {};
     return sum;
   };
   pyfy.Max = Max;
-  function Max(d) {
-    this.max = 0;
+  function Max(d, max) {
+    this.max = max || 0;
     Derived.call(this, d);
   }
   Max.prototype = new Derived();
@@ -335,8 +335,8 @@ var pyfy = {};
     return Math.max(this.parent.fetch(cache, d, i).y, this.max);
   };
   pyfy.Min = Min;
-  function Min(d) {
-    this.min = 0;
+  function Min(d, min) {
+    this.min = min || 0;
     Derived.call(this, d);
   }
   Min.prototype = new Derived();

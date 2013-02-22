@@ -1,7 +1,7 @@
 pyfy.Min = Min;
 
-function Min(d) {
-  this.min = 0;
+function Min(d,min) {
+  this.min = min || 0;
   Derived.call(this,d);
 }
 
