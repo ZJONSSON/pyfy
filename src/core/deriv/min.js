@@ -1,8 +1,10 @@
+/*global pyfy,Derived*/
+
 pyfy.Min = Min;
 
 function Min(d,min) {
-  this.min = min || 0;
   Derived.call(this,d);
+  this.min = min || 0;
 }
 
 Min.prototype = new Derived();

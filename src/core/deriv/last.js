@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Last = Last;
 
 function Last(d) {

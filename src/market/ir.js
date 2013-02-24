@@ -1,8 +1,10 @@
+/*global pyfy,Stock,Derived*/
+
 pyfy.ir = function(d) {
   return new Ir(d);
 };
 
-function Ir(d) {
+function Ir() {
   Stock.apply(this,arguments);
 }
 

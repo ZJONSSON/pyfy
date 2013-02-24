@@ -1,3 +1,5 @@
+/*global Base*/
+
 function Data(d) {
  Base.apply(this,arguments);
  this.data = {};
@@ -43,4 +45,3 @@ Data.prototype.set = function(a) {
   this.data = {};
   return this.update(a);
 };
-

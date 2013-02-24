@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Diff = Diff;
 
 function Diff(d) {

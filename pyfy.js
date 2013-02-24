@@ -13,13 +13,15 @@ var pyfy = {};
   function ascending(a, b) {
     return +a - b;
   }
-  pyfy.Base = Base;
   var ID = 0;
   function Base() {
     this.ID = ID++;
   }
+  pyfy.base = function() {
+    return new Base();
+  };
   Base.prototype.dates = function(d) {
-    var self = this, dates = [], rawDates = this.rawDates();
+    var dates = [], rawDates = this.rawDates();
     if (d) [].concat(d).forEach(function(d) {
       rawDates[d] = d;
     });
@@ -33,7 +35,7 @@ var pyfy = {};
   };
   Base.prototype.point = function(d, cache) {
     var res = 0;
-    this.value(d, cache).forEach(function(e, i) {
+    this.value(d, cache).forEach(function(e) {
       if (e.x == d) res = e.y;
     });
     return res;
@@ -91,12 +93,12 @@ var pyfy = {};
   Base.prototype.filter = function(min, max) {
     return new Filter(this, min, max);
   };
-  pyfy.const = pyfy.c = function(d) {
-    return new Const(d);
-  };
   function Const(d) {
     this.const = d;
   }
+  pyfy.const = pyfy.c = function(d) {
+    return new Const(d);
+  };
   Const.prototype = new Base();
   Const.prototype.fn = function() {
     return this.const;
@@ -155,7 +157,7 @@ var pyfy = {};
     return new Flow(d);
   };
   pyfy.Flow = Flow;
-  function Flow(d) {
+  function Flow() {
     Data.apply(this, arguments);
   }
   Flow.prototype = new Data();
@@ -169,13 +171,13 @@ var pyfy = {};
     });
     return cache[this.ID][i];
   };
+  function Stock() {
+    Data.apply(this, arguments);
+  }
   pyfy.Stock = Stock;
   pyfy.stock = function(d) {
     return new Stock(d);
   };
-  function Stock() {
-    Data.apply(this, arguments);
-  }
   Stock.prototype = new Data();
   Stock.prototype.fn = function(cache, d, i) {
     var self = this;
@@ -298,11 +300,9 @@ var pyfy = {};
     var last = Math.max(i - 1, 0);
     return +this.parent.fetch(cache, d, i).y - (this.parent.fetch(cache, d, last).y || 0);
   };
-  pyfy.sum = sum;
-  pyfy.Sum = Sum;
-  function sum() {
+  pyfy.sum = function() {
     return new Sum.apply(this, arguments);
-  }
+  };
   function Sum() {
     this.parents = Array.prototype.slice(arguments);
   }
@@ -327,8 +327,8 @@ var pyfy = {};
   };
   pyfy.Max = Max;
   function Max(d, max) {
-    this.max = max || 0;
     Derived.call(this, d);
+    this.max = max || 0;
   }
   Max.prototype = new Derived();
   Max.prototype.fn = function(cache, d, i) {
@@ -336,8 +336,8 @@ var pyfy = {};
   };
   pyfy.Min = Min;
   function Min(d, min) {
-    this.min = min || 0;
     Derived.call(this, d);
+    this.min = min || 0;
   }
   Min.prototype = new Derived();
   Min.prototype.fn = function(cache, d, i) {
@@ -398,7 +398,7 @@ var pyfy = {};
   pyfy.ir = function(d) {
     return new Ir(d);
   };
-  function Ir(d) {
+  function Ir() {
     Stock.apply(this, arguments);
   }
   Ir.prototype = new Stock();

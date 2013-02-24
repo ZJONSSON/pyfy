@@ -1,3 +1,5 @@
+/*global pyfy,Base*/
+
 pyfy.Derived = Derived ;
 
 function Derived(d,fn) {

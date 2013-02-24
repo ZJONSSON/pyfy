@@ -1,8 +1,10 @@
+/*global pyfy,Derived*/
+
 pyfy.Max = Max;
 
 function Max(d,max) {
-  this.max = max || 0;
   Derived.call(this,d);
+  this.max = max || 0;
 }
 
 Max.prototype = new Derived();

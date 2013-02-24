@@ -1,10 +1,12 @@
+/*global pyfy,Data*/
+
 pyfy.flow = function(d) {
   return new Flow(d);
 };
 
 pyfy.Flow = Flow;
 
-function Flow(d) {
+function Flow() {
  Data.apply(this,arguments);
 }
 

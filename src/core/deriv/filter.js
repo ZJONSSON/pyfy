@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Filter = Filter;
 
 function Filter(d,min,max) {

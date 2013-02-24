@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Neg = Neg;
 
 function Neg(d) {

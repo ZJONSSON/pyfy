@@ -1,9 +1,8 @@
-pyfy.sum = sum;
-pyfy.Sum = Sum;
+/*global pyfy,Base*/
 
-function sum() {
+pyfy.sum = function() {
   return new Sum.apply(this,arguments);
-}
+};
 
 function Sum() {
   this.parents = Array.prototype.slice(arguments);

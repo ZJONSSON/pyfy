@@ -1,4 +1,4 @@
-pyfy.Base = Base;
+/*global pyfy,Cumul,Diff,Last,Max,Min,Neg,Derived,Filter*/
 
 var ID=0;
 
@@ -6,9 +6,12 @@ function Base() {
   this.ID = ID++;
 }
 
+pyfy.base = function() {
+  return new Base();
+};
+
 Base.prototype.dates = function(d) {
-  var self = this,
-      dates = [],
+  var dates = [],
       rawDates = this.rawDates();
 
   if (d) [].concat(d).forEach(function(d) { rawDates[d]= d;}); // add user-dates if applicable
@@ -26,7 +29,7 @@ Base.prototype.rawDates = function(dates,ids) {
 
 Base.prototype.point = function(d,cache) {
   var res = 0;
-  this.value(d,cache).forEach(function(e,i) {
+  this.value(d,cache).forEach(function(e) {
     if (e.x == d) res =  e.y;
   });
   return res;

@@ -1,3 +1,4 @@
+/*global pyfy,Base*/
 pyfy.Operator = Operator;
 
 var ops = {

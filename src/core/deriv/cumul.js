@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Cumul = Cumul;
 
 function Cumul(d) {

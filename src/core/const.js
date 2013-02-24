@@ -1,10 +1,12 @@
-pyfy.const = pyfy.c = function(d) {
-  return new Const(d);
-};
+/*global pyfy,Base*/
 
 function Const(d) {
   this.const = d;
 }
+
+pyfy.const = pyfy.c = function(d) {
+  return new Const(d);
+};
 
 Const.prototype = new Base();
 

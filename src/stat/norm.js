@@ -1,3 +1,5 @@
+/*global pyfy,Base*/
+
 pyfy.norm = function(s,vol,r) {
   return new Norm(s,vol,r);
 };

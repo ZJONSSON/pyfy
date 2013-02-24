@@ -1,4 +1,7 @@
+/*global pyfy,Data*/
+
 pyfy.Price = Price;
+
 pyfy.price = function(d) {
   return new Price(d);
 };
