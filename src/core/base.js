@@ -52,16 +52,20 @@ Base.prototype.x = function(dates,cache) {
 
 Base.prototype.get = function(dates,cache) {
   if (!cache) cache = {};
+  var allDates = cache.__dates__ = this.dates(dates),
+      l = allDates.length; 
 
-  var allDates = cache.__dates__ = this.dates(dates).sort(ascending);
-  cache.__dt__ = allDates.map(function(d,i) { return (d-(allDates[i-1] || allDates[0]))/ DAYMS;});
+  if (!cache.__dt__) cache.__dt__ = allDates.map(function(d,i) { 
+    return (d-(allDates[i-1] || allDates[0]))/ DAYMS;
+  });
+  
   if (!cache[this.ID]) cache[this.ID] = [];
-  var l = cache.__dates__.length,i;
-
-  for (i=0;i<l;i++) {
-    this.fetch(cache,cache.__dates__[i],i);
-    if (cache[this.ID].length == l) {break;}
-  }
+  
+  allDates.every(function(d,i) {
+    this.fetch(cache,d,i);
+    return (cache[this.ID].length != l);   // break if we have all values
+  },this);
+  
   return cache;
 };
 
