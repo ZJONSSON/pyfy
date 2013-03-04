@@ -21,16 +21,15 @@ Norm.prototype.fn = function(cache,d,i) {
   var s = this.s,
       self = this,
       dates = cache.__dates__;
-  
-  cache[this.ID] = dates
-    .map(function(d,i) { return d-(dates[i-1] || dates[0]) / DAYMS;})
-    .map(function(dt,i) {
-      var e = (self.r - Math.pow(self.vol,2)/2*dt + self.vol*Math.sqrt(dt)*rndNorm());
-      return {
-        x:dates[i],
-        y:s = s* Math.exp(e)
-      };
-    });
+      
+  cache[this.ID] = cache.__dt__.map(function(dt,i) {
+    dt = dt / 365;
+    var e = (self.r - Math.pow(self.vol,2)/2)*dt + self.vol*Math.sqrt(dt)*rndNorm();
+    return {
+      x:dates[i],
+      y:s = s* Math.exp(e)
+    };
+  });
   return cache[this.ID][i];
 };
 

@@ -53,18 +53,15 @@ var pyfy = {};
   };
   Base.prototype.get = function(dates, cache) {
     if (!cache) cache = {};
-    var allDates = cache.__dates__ = this.dates(dates).sort(ascending);
-    cache.__dt__ = allDates.map(function(d, i) {
-      return (d - (allDates[i - 1] || allDates[0])) / DAYMS;
+    var allDates = cache.__dates__ = this.dates(dates), l = allDates.length;
+    if (!cache.__dt__) cache.__dt__ = allDates.map(function(d, i) {
+      return (d - (allDates[i - 1] || cache.__value__ || new Date())) / DAYMS;
     });
     if (!cache[this.ID]) cache[this.ID] = [];
-    var l = cache.__dates__.length, i;
-    for (i = 0; i < l; i++) {
-      this.fetch(cache, cache.__dates__[i], i);
-      if (cache[this.ID].length == l) {
-        break;
-      }
-    }
+    allDates.every(function(d, i) {
+      this.fetch(cache, d, i);
+      return cache[this.ID].length != l;
+    }, this);
     return cache;
   };
   Base.prototype.fetch = function(cache, d, i) {
@@ -273,7 +270,7 @@ var pyfy = {};
   }
   Filter.prototype = new Derived();
   Filter.prototype.fn = function(cache, d, i) {
-    return d >= this.min && d <= this.max ? this.parent.fetch(cache, d, i - 1).y : 0;
+    return d >= this.min && d <= this.max ? this.parent.fetch(cache, d, i).y : 0;
   };
   pyfy.Last = Last;
   function Last(d) {
@@ -526,10 +523,9 @@ var pyfy = {};
   Norm.prototype = new Base();
   Norm.prototype.fn = function(cache, d, i) {
     var s = this.s, self = this, dates = cache.__dates__;
-    cache[this.ID] = dates.map(function(d, i) {
-      return d - (dates[i - 1] || dates[0]) / DAYMS;
-    }).map(function(dt, i) {
-      var e = self.r - Math.pow(self.vol, 2) / 2 * dt + self.vol * Math.sqrt(dt) * rndNorm();
+    cache[this.ID] = cache.__dt__.map(function(dt, i) {
+      dt = dt / 365;
+      var e = (self.r - Math.pow(self.vol, 2) / 2) * dt + self.vol * Math.sqrt(dt) * rndNorm();
       return {
         x: dates[i],
         y: s = s * Math.exp(e)
