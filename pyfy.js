@@ -102,8 +102,8 @@ var pyfy = {};
   Base.prototype.derived = function(fn) {
     return new Derived(this, fn);
   };
-  Base.prototype.filter = function(min, max) {
-    return new Filter(this, min, max);
+  Base.prototype.period = function(min, max) {
+    return new Period(this, min, max);
   };
   function Const(d) {
     this.const = d;
@@ -295,15 +295,15 @@ var pyfy = {};
     this.parent = d;
     return this;
   };
-  pyfy.Filter = Filter;
-  function Filter(d, min, max) {
+  pyfy.Period = Period;
+  function Period(d, start, fin) {
     Derived.call(this, d);
-    this.min = min || -Infinity;
-    this.max = max || Infinity;
+    this.start = start || -Infinity;
+    this.fin = fin || Infinity;
   }
-  Filter.prototype = new Derived();
-  Filter.prototype.fn = function(cache, d, i) {
-    return d >= this.min && d <= this.max ? this.parent.fetch(cache, d, i) : 0;
+  Period.prototype = new Derived();
+  Period.prototype.fn = function(cache, d, i) {
+    return d >= this.start && d <= this.fin ? this.parent.fetch(cache, d, i) : 0;
   };
   pyfy.Last = Last;
   function Last(d) {

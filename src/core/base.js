@@ -23,7 +23,6 @@ Base.prototype.dates = function(d) {
   return dates.sort(ascending);
 };
 
-
 Base.prototype.rawDates = function(dates,ids) {
   dates = dates || {};
   ids = ids || {};
@@ -107,6 +106,6 @@ Base.prototype.derived = function(fn) {
   return new Derived(this,fn);
 };
 
-Base.prototype.filter = function(min,max) {
-  return new Filter(this,min,max);
+Base.prototype.period = function(min,max) {
+  return new Period(this,min,max);
 };
