@@ -1,4 +1,4 @@
-/*global pyfy,Stock,Derived*/
+/*global pyfy,Stock,Derived,fetch*/
 
 pyfy.ir = function(d) {
   return new Ir(d);
@@ -6,12 +6,13 @@ pyfy.ir = function(d) {
 
 function Ir() {
   Stock.apply(this,arguments);
+  this.df = new Df(this);
 }
 
 Ir.prototype = new Stock();
 
-Ir.prototype.df = function(val) {
-  return new Df(this,val);
+pyfy.df = function(d) {
+  return new Df(d);
 };
 
 function Df(d,val) {
@@ -21,29 +22,10 @@ function Df(d,val) {
 
 Df.prototype = new Derived();
 
-Df.prototype.rawDates = function(dates,ids) {
-  ids = ids || {};
-  dates = dates || {};
-  if (!ids[this.ID]) {
-   this.parent.rawDates.apply(this.parent,dates,ids);
-   if (this.val) dates[this.val] = this.val;
-   ids[this.ID] = true;
-  }
-  return dates;
-};
-
 Df.prototype.fn = function(cache,d,i) {
   var self = this,
-      last = 1,
-      lastDate = this.val || cache.__dates__[0];
+      dt = cache.__dt__[i] /365;
 
-  cache[this.ID] = cache.__dates__.map(function(d,i) {
-    var res = {x:d,y:0};
-    if (d>=lastDate) {
-      res.y = last = last * Math.exp(-self.parent.fetch(cache,d,i)*(d-lastDate)/DAYMS/365.0) ;
-      lastDate = d;
-    }
-    return res;
-  });
-  return cache[this.ID][i];
-};
+  return (i===0) ? 1 : 
+    fetch(this,cache,d,i-1) * Math.exp(-fetch(self.parent,cache,d,i)*dt);
+};  
