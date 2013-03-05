@@ -13,17 +13,17 @@ all: \
 	src/defs.js \
 	src/core/base.js \
 	src/core/const.js \
-	src/core/data/data.js \
+	src/core/sum.js \
+	src/core/data.js \
 	src/core/data/flow.js \
 	src/core/data/stock.js \
 	src/core/data/price.js \
 	src/core/data/interval.js \
-	src/core/deriv/derived.js \
+	src/core/derived.js \
 	src/core/deriv/filter.js \
 	src/core/deriv/last.js \
 	src/core/deriv/cumul.js \
 	src/core/deriv/diff.js \
-	src/core/sum.js \
 	src/core/deriv/max.js \
 	src/core/deriv/min.js \
 	src/core/deriv/neg.js \

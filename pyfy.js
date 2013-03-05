@@ -120,6 +120,23 @@ var pyfy = {};
     this.const = d;
     return this;
   };
+  pyfy.sum = function(d) {
+    return new Sum(d);
+  };
+  function Sum(d) {
+    this.parents = d;
+  }
+  Sum.prototype = new Base();
+  Sum.prototype.inputs = function() {
+    return this.parents;
+  };
+  Sum.prototype.fn = function(cache, d, i) {
+    var sum = 0;
+    this.parents.forEach(function(d) {
+      sum += d.fetch(cache, d, i);
+    });
+    return sum;
+  };
   function Data(d) {
     Base.apply(this, arguments);
     this.data = {};
@@ -312,23 +329,6 @@ var pyfy = {};
   Diff.prototype.fn = function(cache, d, i) {
     var last = Math.max(i - 1, 0);
     return +this.parent.fetch(cache, d, i) - (this.parent.fetch(cache, d, last) || 0);
-  };
-  pyfy.sum = function(d) {
-    return new Sum(d);
-  };
-  function Sum(d) {
-    this.parents = d;
-  }
-  Sum.prototype = new Base();
-  Sum.prototype.inputs = function() {
-    return this.parents;
-  };
-  Sum.prototype.fn = function(cache, d, i) {
-    var sum = 0;
-    this.parents.forEach(function(d) {
-      sum += d.fetch(cache, d, i);
-    });
-    return sum;
   };
   pyfy.Max = Max;
   function Max(d, max) {
