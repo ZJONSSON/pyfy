@@ -5,3 +5,7 @@ function today() {
 }
 
 function ascending(a,b) { return +a-b;}
+
+function fetch(obj,cache,d,i) {
+  return (obj.fetch) ? obj.fetch(cache,d,i) : obj;
+}
