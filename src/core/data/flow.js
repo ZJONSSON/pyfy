@@ -17,5 +17,5 @@ Flow.prototype.fn = function(cache,d,i) {
   cache[this.ID] = cache.__dates__.map(function(d) {
     return self.data[d] || {x:d,y:0};
   });
-  return cache[this.ID][i];
+  return cache[this.ID][i].y;
 };

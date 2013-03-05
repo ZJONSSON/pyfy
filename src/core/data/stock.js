@@ -21,7 +21,7 @@ Stock.prototype.fn = function(cache,d,i) {
     }
     return {x:d,y:0};
   });
-  return cache[this.ID][i];
+  return cache[this.ID][i].y;
 };
 
 Stock.prototype.val = function(d) {

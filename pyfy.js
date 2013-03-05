@@ -78,10 +78,13 @@ var pyfy = {};
   };
   Base.prototype.fetch = function(cache, d, i) {
     if (!cache[this.ID]) cache[this.ID] = [];
-    if (cache[this.ID][i] === undefined) cache[this.ID][i] = {
-      x: d,
-      y: this.fn(cache, d, i)
-    };
+    if (cache[this.ID][i] === undefined) {
+      var res = this.fn(cache, d, i);
+      if (!cache[this.ID][i]) cache[this.ID][i] = {
+        x: d,
+        y: res
+      };
+    }
     return cache[this.ID][i].y;
   };
   [ Cumul, Diff, Last, Max, Min, Neg ].forEach(function(Fn) {
@@ -179,7 +182,7 @@ var pyfy = {};
         y: 0
       };
     });
-    return cache[this.ID][i];
+    return cache[this.ID][i].y;
   };
   function Stock() {
     Data.apply(this, arguments);
@@ -204,7 +207,7 @@ var pyfy = {};
         y: 0
       };
     });
-    return cache[this.ID][i];
+    return cache[this.ID][i].y;
   };
   Stock.prototype.val = function(d) {
     var self = this;
@@ -387,7 +390,7 @@ var pyfy = {};
     return [ this.parent, this.other ];
   };
   Operator.prototype.fn = function(cache, d, i) {
-    var a = this.parent.fetch(cache, d, i), b = this.other.fetch ? this.other.fetch(cache, d, i) : this.other;
+    var a = fetch(this.parent, cache, d, i), b = fetch(this.other, cache, d, i);
     return ops[this.op](a, b);
   };
   pyfy.ir = function(d) {
@@ -524,9 +527,7 @@ var pyfy = {};
   };
   Norm.prototype.fn = function(cache, d, i) {
     var s = this.s, self = this, dates = cache.__dates__;
-    var dt = cache.__dt__[i] / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = this.r;
-    vol = this.vol;
-    e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
+    var dt = cache.__dt__[i] / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
     return s * Math.exp(e);
   };
 })();
