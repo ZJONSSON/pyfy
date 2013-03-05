@@ -10,8 +10,8 @@ function Derived(d,fn) {
 
 Derived.prototype = new Base();
 
-Derived.prototype.rawDates = function() {
-  return this.parent.rawDates.apply(this.parent,arguments);
+Derived.prototype.inputs = function() {
+  return this.parent;
 };
 
 Derived.prototype.fn= function(cache,d,i) {

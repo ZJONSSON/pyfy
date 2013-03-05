@@ -24,15 +24,8 @@ function Operator(op,parent,other) {
 
 Operator.prototype = new Base();
 
-Operator.prototype.rawDates = function(dates,ids) {
-  dates = dates || {};
-  ids = ids || {};
-  if (!ids[this.ID]) {
-    ids[this.ID]=true;
-    if (this.parent.rawDates) this.parent.rawDates(dates,ids);
-    if (this.other.rawDates) this.other.rawDates(dates,ids);
-  }
-  return dates;
+Operator.prototype.inputs = function() {
+  return [this.parent,this.other];
 };
 
 Operator.prototype.fn = function(cache,d,i) {

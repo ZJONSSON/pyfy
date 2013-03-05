@@ -23,8 +23,19 @@ Base.prototype.dates = function(d) {
   return dates.sort(ascending);
 };
 
+
 Base.prototype.rawDates = function(dates,ids) {
-  return dates || {};
+  dates = dates || {};
+  ids = ids || {};
+
+  if (!ids[this.ID] && this.inputs) {
+    var inputs = typeof this.inputs === "function" ? this.inputs() : this.inputs;
+    ids[this.ID] = true;
+    [].concat(this.inputs()).forEach(function(input) {
+      if (input.rawDates) input.rawDates(dates,ids);
+    });
+  }
+  return dates;
 };
 
 Base.prototype.point = function(d,cache) {

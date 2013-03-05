@@ -13,6 +13,9 @@ var pyfy = {};
   function ascending(a, b) {
     return +a - b;
   }
+  function fetch(obj, cache, d, i) {
+    return obj.fetch ? obj.fetch(cache, d, i) : obj;
+  }
   var ID = 0;
   function Base() {
     this.ID = ID++;
@@ -31,7 +34,16 @@ var pyfy = {};
     return dates.sort(ascending);
   };
   Base.prototype.rawDates = function(dates, ids) {
-    return dates || {};
+    dates = dates || {};
+    ids = ids || {};
+    if (!ids[this.ID] && this.inputs) {
+      var inputs = typeof this.inputs === "function" ? this.inputs() : this.inputs;
+      ids[this.ID] = true;
+      [].concat(this.inputs()).forEach(function(input) {
+        if (input.rawDates) input.rawDates(dates, ids);
+      });
+    }
+    return dates;
   };
   Base.prototype.point = function(d, cache) {
     var res = 0;
@@ -55,7 +67,7 @@ var pyfy = {};
     if (!cache) cache = {};
     var allDates = cache.__dates__ = this.dates(dates), l = allDates.length;
     if (!cache.__dt__) cache.__dt__ = allDates.map(function(d, i) {
-      return (d - (allDates[i - 1] || cache.__value__ || new Date())) / DAYMS;
+      return (d - (allDates[i - 1] || allDates[0])) / DAYMS;
     });
     if (!cache[this.ID]) cache[this.ID] = [];
     allDates.every(function(d, i) {
@@ -94,6 +106,7 @@ var pyfy = {};
     this.const = d;
   }
   pyfy.const = pyfy.c = function(d) {
+    Base.apply(this, arguments);
     return new Const(d);
   };
   Const.prototype = new Base();
@@ -252,8 +265,8 @@ var pyfy = {};
     if (fn) this.fn = fn;
   }
   Derived.prototype = new Base();
-  Derived.prototype.rawDates = function() {
-    return this.parent.rawDates.apply(this.parent, arguments);
+  Derived.prototype.inputs = function() {
+    return this.parent;
   };
   Derived.prototype.fn = function(cache, d, i) {
     return this.parent.fetch(cache, d, i).y;
@@ -297,23 +310,15 @@ var pyfy = {};
     var last = Math.max(i - 1, 0);
     return +this.parent.fetch(cache, d, i).y - (this.parent.fetch(cache, d, last).y || 0);
   };
-  pyfy.sum = function() {
-    return new Sum.apply(this, arguments);
+  pyfy.sum = function(d) {
+    return new Sum(d);
   };
-  function Sum() {
-    this.parents = Array.prototype.slice(arguments);
+  function Sum(d) {
+    this.parents = d;
   }
   Sum.prototype = new Base();
-  Sum.prototype.dates = function() {
-    var dates = {};
-    this.parents.forEach(function(d) {
-      d.dates().forEach(function(d) {
-        dates[d] = d;
-      });
-    });
-    return Object.keys(dates).map(function(key) {
-      return dates[key];
-    }).sort(ascending);
+  Sum.prototype.inputs = function() {
+    return this.parents;
   };
   Sum.prototype.fn = function(cache, d, i) {
     var sum = 0;
@@ -378,15 +383,8 @@ var pyfy = {};
     this.op = op;
   }
   Operator.prototype = new Base();
-  Operator.prototype.rawDates = function(dates, ids) {
-    dates = dates || {};
-    ids = ids || {};
-    if (!ids[this.ID]) {
-      ids[this.ID] = true;
-      if (this.parent.rawDates) this.parent.rawDates(dates, ids);
-      if (this.other.rawDates) this.other.rawDates(dates, ids);
-    }
-    return dates;
+  Operator.prototype.inputs = function() {
+    return [ this.parent, this.other ];
   };
   Operator.prototype.fn = function(cache, d, i) {
     var a = this.parent.fetch(cache, d, i).y, b = this.other.fetch ? this.other.fetch(cache, d, i).y : this.other;
