@@ -5,6 +5,7 @@ function Const(d) {
 }
 
 pyfy.const = pyfy.c = function(d) {
+  Base.apply(this,arguments);
   return new Const(d);
 };
 
