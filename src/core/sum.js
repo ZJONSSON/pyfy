@@ -17,7 +17,7 @@ Sum.prototype.inputs = function() {
 Sum.prototype.fn = function(cache,d,i) {
   var sum = 0;
   this.parents.forEach(function(d) {
-    sum+=d.fetch(cache,d,i).y;
+    sum+=d.fetch(cache,d,i);
   });
   return sum;
 };

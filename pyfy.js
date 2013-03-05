@@ -82,7 +82,7 @@ var pyfy = {};
       x: d,
       y: this.fn(cache, d, i)
     };
-    return cache[this.ID][i];
+    return cache[this.ID][i].y;
   };
   [ Cumul, Diff, Last, Max, Min, Neg ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(d) {
@@ -269,7 +269,7 @@ var pyfy = {};
     return this.parent;
   };
   Derived.prototype.fn = function(cache, d, i) {
-    return this.parent.fetch(cache, d, i).y;
+    return this.parent.fetch(cache, d, i);
   };
   Derived.prototype.setParent = function(d) {
     this.parent = d;
@@ -283,7 +283,7 @@ var pyfy = {};
   }
   Filter.prototype = new Derived();
   Filter.prototype.fn = function(cache, d, i) {
-    return d >= this.min && d <= this.max ? this.parent.fetch(cache, d, i).y : 0;
+    return d >= this.min && d <= this.max ? this.parent.fetch(cache, d, i) : 0;
   };
   pyfy.Last = Last;
   function Last(d) {
@@ -291,7 +291,7 @@ var pyfy = {};
   }
   Last.prototype = new Derived();
   Last.prototype.fn = function(cache, d, i) {
-    return 0 + (i > 0 && this.parent.fetch(cache, d, i - 1).y);
+    return 0 + (i > 0 && this.parent.fetch(cache, d, i - 1));
   };
   pyfy.Cumul = Cumul;
   function Cumul(d) {
@@ -299,7 +299,7 @@ var pyfy = {};
   }
   Cumul.prototype = new Derived();
   Cumul.prototype.fn = function(cache, d, i) {
-    return this.parent.fetch(cache, d, i).y + (i > 0 && cache[this.ID][i - 1].y);
+    return this.parent.fetch(cache, d, i) + (i > 0 && cache[this.ID][i - 1]);
   };
   pyfy.Diff = Diff;
   function Diff(d) {
@@ -308,7 +308,7 @@ var pyfy = {};
   Diff.prototype = new Derived();
   Diff.prototype.fn = function(cache, d, i) {
     var last = Math.max(i - 1, 0);
-    return +this.parent.fetch(cache, d, i).y - (this.parent.fetch(cache, d, last).y || 0);
+    return +this.parent.fetch(cache, d, i) - (this.parent.fetch(cache, d, last) || 0);
   };
   pyfy.sum = function(d) {
     return new Sum(d);
@@ -323,7 +323,7 @@ var pyfy = {};
   Sum.prototype.fn = function(cache, d, i) {
     var sum = 0;
     this.parents.forEach(function(d) {
-      sum += d.fetch(cache, d, i).y;
+      sum += d.fetch(cache, d, i);
     });
     return sum;
   };
@@ -334,7 +334,7 @@ var pyfy = {};
   }
   Max.prototype = new Derived();
   Max.prototype.fn = function(cache, d, i) {
-    return Math.max(this.parent.fetch(cache, d, i).y, this.max);
+    return Math.max(this.parent.fetch(cache, d, i), this.max);
   };
   pyfy.Min = Min;
   function Min(d, min) {
@@ -343,7 +343,7 @@ var pyfy = {};
   }
   Min.prototype = new Derived();
   Min.prototype.fn = function(cache, d, i) {
-    return Math.min(this.parent.fetch(cache, d, i).y, this.min);
+    return Math.min(this.parent.fetch(cache, d, i), this.min);
   };
   pyfy.Neg = Neg;
   function Neg(d) {
@@ -351,7 +351,7 @@ var pyfy = {};
   }
   Neg.prototype = new Derived();
   Neg.prototype.fn = function(cache, d, i) {
-    return -this.parent.fetch(cache, d, i).y;
+    return -this.parent.fetch(cache, d, i);
   };
   pyfy.Operator = Operator;
   var ops = {
@@ -387,7 +387,7 @@ var pyfy = {};
     return [ this.parent, this.other ];
   };
   Operator.prototype.fn = function(cache, d, i) {
-    var a = this.parent.fetch(cache, d, i).y, b = this.other.fetch ? this.other.fetch(cache, d, i).y : this.other;
+    var a = this.parent.fetch(cache, d, i), b = this.other.fetch ? this.other.fetch(cache, d, i) : this.other;
     return ops[this.op](a, b);
   };
   pyfy.ir = function(d) {
@@ -423,7 +423,7 @@ var pyfy = {};
         y: 0
       };
       if (d >= lastDate) {
-        res.y = last = last * Math.exp(-self.parent.fetch(cache, d, i).y * (d - lastDate) / DAYMS / 365);
+        res.y = last = last * Math.exp(-self.parent.fetch(cache, d, i) * (d - lastDate) / DAYMS / 365);
         lastDate = d;
       }
       return res;
@@ -519,16 +519,14 @@ var pyfy = {};
     this.vol = vol || 0;
   }
   Norm.prototype = new Base();
+  Norm.prototype.inputs = function() {
+    return [ this.s, this.r, this.vol ];
+  };
   Norm.prototype.fn = function(cache, d, i) {
     var s = this.s, self = this, dates = cache.__dates__;
-    cache[this.ID] = cache.__dt__.map(function(dt, i) {
-      dt = dt / 365;
-      var e = (self.r - Math.pow(self.vol, 2) / 2) * dt + self.vol * Math.sqrt(dt) * rndNorm();
-      return {
-        x: dates[i],
-        y: s = s * Math.exp(e)
-      };
-    });
-    return cache[this.ID][i];
+    var dt = cache.__dt__[i] / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = this.r;
+    vol = this.vol;
+    e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
+    return s * Math.exp(e);
   };
 })();

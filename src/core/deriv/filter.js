@@ -11,5 +11,5 @@ function Filter(d,min,max) {
 Filter.prototype = new Derived();
 
 Filter.prototype.fn = function(cache,d,i) {
-  return (d>= this.min && d<= this.max) ? this.parent.fetch(cache,d,i).y : 0;
+  return (d>= this.min && d<= this.max) ? this.parent.fetch(cache,d,i) : 0;
 };

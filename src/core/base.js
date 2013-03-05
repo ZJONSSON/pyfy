@@ -83,7 +83,7 @@ Base.prototype.get = function(dates,cache) {
 Base.prototype.fetch = function(cache,d,i) {
   if (!cache[this.ID]) cache[this.ID] = [];
   if (cache[this.ID][i] === undefined) cache[this.ID][i] = {x:d,y:this.fn(cache,d,i)};
-  return cache[this.ID][i];
+  return cache[this.ID][i].y;
 };
 
 [Cumul,Diff,Last,Max,Min,Neg].forEach(function(Fn) {

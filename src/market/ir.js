@@ -40,7 +40,7 @@ Df.prototype.fn = function(cache,d,i) {
   cache[this.ID] = cache.__dates__.map(function(d,i) {
     var res = {x:d,y:0};
     if (d>=lastDate) {
-      res.y = last = last * Math.exp(-self.parent.fetch(cache,d,i).y*(d-lastDate)/DAYMS/365.0) ;
+      res.y = last = last * Math.exp(-self.parent.fetch(cache,d,i)*(d-lastDate)/DAYMS/365.0) ;
       lastDate = d;
     }
     return res;

@@ -9,5 +9,5 @@ function Cumul(d) {
 Cumul.prototype = new Derived();
 
 Cumul.prototype.fn = function(cache,d,i) {
-  return this.parent.fetch(cache,d,i).y + (i>0 && cache[this.ID][i-1].y);
+  return this.parent.fetch(cache,d,i) + (i>0 && cache[this.ID][i-1]);
 };

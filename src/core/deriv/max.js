@@ -10,5 +10,5 @@ function Max(d,max) {
 Max.prototype = new Derived();
 
 Max.prototype.fn = function(cache,d,i) {
-  return Math.max(this.parent.fetch(cache,d,i).y,this.max) ;
+  return Math.max(this.parent.fetch(cache,d,i),this.max) ;
 };

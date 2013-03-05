@@ -29,7 +29,7 @@ Operator.prototype.inputs = function() {
 };
 
 Operator.prototype.fn = function(cache,d,i) {
-  var a = this.parent.fetch(cache,d,i).y,
-      b = (this.other.fetch) ? this.other.fetch(cache,d,i).y : this.other;
+  var a = this.parent.fetch(cache,d,i),
+      b = (this.other.fetch) ? this.other.fetch(cache,d,i) : this.other;
   return ops[this.op](a,b);
 };
