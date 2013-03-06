@@ -15,21 +15,24 @@ Object.keys(ops).forEach(function(op) {
   };
 });
 
-function Operator(op,parent,other) {
+function Operator(op,left,right) {
   Base.apply(this,arguments);
-  this.parent = parent;
-  this.other = other;
+  this.left = left;
+  this.right = right;
   this.op = op;
 }
 
 Operator.prototype = new Base();
 
 Operator.prototype.inputs = function() {
-  return [this.parent,this.other];
+  return [this.left,this.right];
 };
 
 Operator.prototype.fn = function(cache,d,i) {
-  var a = fetch(this.parent,cache,d,i),
-      b = fetch(this.other,cache,d,i);
-  return ops[this.op](a,b);
+  var left,right;
+  right = fetch(this.right,cache,d,i);
+  // We can bypass further evaluation if the right side is zero in a multiplication
+  if (!right && this.op =="mul") return 0;
+  left = fetch(this.left,cache,d,i);
+  return ops[this.op](left,right);
 };
