@@ -3,9 +3,9 @@
   * @license http://creativecommons.org/licenses/by-nc-sa/3.0/
   * Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
   */
-var pyfy = {};
-
 (function() {
+  var pyfy = this.pyfy = {};
+  if (typeof module !== "undefined") module.exports = pyfy;
   var DAYMS = 1e3 * 60 * 60 * 24;
   function today() {
     return new Date(Math.floor(new Date() / DAYMS) * DAYMS + 1e3 * 60 * 60 * 5);
