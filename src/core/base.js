@@ -10,6 +10,8 @@ pyfy.base = function() {
   return new Base();
 };
 
+pyfy.Base = Base;
+
 Base.prototype.dates = function(d) {
   var dates = [],
       rawDates = this.rawDates();

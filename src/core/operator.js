@@ -22,6 +22,8 @@ function Operator(op,left,right) {
   this.op = op;
 }
 
+pyfy.Operator = Operator;
+
 Operator.prototype = new Base();
 
 Operator.prototype.inputs = function() {
