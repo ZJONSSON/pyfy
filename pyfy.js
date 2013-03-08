@@ -23,6 +23,7 @@
   pyfy.base = function() {
     return new Base();
   };
+  pyfy.Base = Base;
   Base.prototype.dates = function(d) {
     var dates = [], rawDates = this.rawDates();
     if (d) [].concat(d).forEach(function(d) {
@@ -140,10 +141,10 @@
   function Data(d) {
     Base.apply(this, arguments);
     this.data = {};
-    this.sorted = [];
     this._dates = [];
     if (d) this.update(d);
   }
+  pyfy.Data = Data;
   Data.prototype = new Base();
   Data.prototype.rawDates = function(dates, ids) {
     dates = dates || {};
@@ -171,17 +172,35 @@
         self.data[d.x] = d;
       });
     }
-    this._dates = [];
-    this.sorted = Object.keys(this.data).map(function(key) {
-      var d = self.data[key];
-      self._dates.push(d.x);
-      return d;
-    }).sort(ascending);
+    this._dates = Object.keys(this.data).map(function(key) {
+      return this.data[key].x;
+    }, this).sort(ascending);
     return this;
   };
   Data.prototype.set = function(a) {
     this.data = {};
     return this.update(a);
+  };
+  Data.prototype.fn = function(cache, d, i) {
+    var self = this, dates = this.dates(), prev = this.data[dates[0]], last = this.data[dates[dates.length - 1]];
+    cache[this.ID] = cache.__dates__.map(function(d) {
+      if (!Object.keys(self.data).length) return {
+        x: 0,
+        y: 0
+      };
+      while (dates.length) {
+        var next = self.data[dates[0]];
+        if (d == next.x) return next;
+        if (d < next.x) return self._fn(d, prev, next);
+        prev = next;
+        dates = dates.slice(1);
+      }
+      return last;
+    });
+    return cache[this.ID][i].y;
+  };
+  Data.prototype._fn = function(d, prev, next) {
+    return undefined;
   };
   pyfy.flow = function(d) {
     return new Flow(d);
@@ -209,37 +228,8 @@
     return new Stock(d);
   };
   Stock.prototype = new Data();
-  Stock.prototype.fn = function(cache, d, i) {
-    var self = this;
-    cache[this.ID] = cache.__dates__.map(function(d) {
-      var i = self.sorted.length;
-      while (i--) {
-        if (self.sorted[i].x <= d) return {
-          x: d,
-          y: self.sorted[i].y
-        };
-      }
-      return {
-        x: d,
-        y: 0
-      };
-    });
-    return cache[this.ID][i].y;
-  };
-  Stock.prototype.val = function(d) {
-    var self = this;
-    if (arguments.length === 0) return this.sorted;
-    if (d.length === undefined) d = [ d ];
-    return d.map(function(d) {
-      var i = self.sorted.length;
-      while (--i) {
-        if (self.sorted[i].x <= d) return {
-          x: d,
-          y: self.sorted[i].y
-        };
-      }
-      return self.sorted[0];
-    });
+  Stock.prototype._fn = function(d, last) {
+    return last;
   };
   pyfy.Price = Price;
   pyfy.price = function(d) {
@@ -249,24 +239,12 @@
     Data.apply(this, arguments);
   }
   Price.prototype = new Data();
-  Price.prototype.fn = function(cache, d, i) {
-    var self = this;
-    cache[this.ID] = cache.__dates__.map(function(d) {
-      var i = self.sorted.length, last = self.sorted[self.sorted.length - 1];
-      while (i--) {
-        var next = self.sorted[i];
-        if (next.x <= d) return {
-          x: d,
-          y: next.y + (last.y - next.y) * (d - next.x) / (next.x - last.x)
-        };
-        last = next;
-      }
-      return {
-        x: d,
-        y: 0
-      };
-    });
-    return cache[this.ID][i];
+  Price.prototype._fn = function(d, prev, next) {
+    if (next.x == prev.x) return prev;
+    if (d < next.x) return {
+      x: d,
+      y: prev.y + (next.y - prev.y) * (d - prev.x) / (next.x - prev.x)
+    };
   };
   pyfy.interval = function(start, dm, no, val) {
     var interval = [];

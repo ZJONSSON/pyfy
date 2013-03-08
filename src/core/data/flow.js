@@ -1,5 +1,4 @@
 /*global pyfy,Data*/
-
 pyfy.flow = function(d) {
   return new Flow(d);
 };

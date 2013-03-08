@@ -3,10 +3,11 @@
 function Data(d) {
  Base.apply(this,arguments);
  this.data = {};
- this.sorted = [];
  this._dates = [];
  if (d) this.update(d);
 }
+
+pyfy.Data = Data;
 
 Data.prototype = new Base();
 
@@ -32,16 +33,40 @@ Data.prototype.update = function(a) {
       self.data[d.x] = d;
     });
   }
-  this._dates = [];
-  this.sorted = Object.keys(this.data).map(function(key) {
-    var d = self.data[key];
-    self._dates.push(d.x);
-    return d;
-  }).sort(ascending);
+  this._dates = Object.keys(this.data)
+    .map(function(key) {
+      return this.data[key].x;
+    },this)
+    .sort(ascending);
   return this;
 };
 
 Data.prototype.set = function(a) {
   this.data = {};
   return this.update(a);
+};
+
+
+Data.prototype.fn = function(cache,d,i) {
+  var self = this,
+      dates = this.dates(),
+      prev = this.data[dates[0]],
+      last = this.data[dates[dates.length-1]];
+
+  cache[this.ID] = cache.__dates__.map(function(d) {
+    if (!Object.keys(self.data).length) return {x:0,y:0};
+    while (dates.length) {
+      var next = self.data[dates[0]];
+      if (d == next.x) return next;
+      if (d < next.x) return self._fn(d,prev,next);
+      prev = next;
+      dates = dates.slice(1);
+    }
+    return last;
+  });
+  return cache[this.ID][i].y;
+};
+
+Data.prototype._fn = function(d,prev,next) {
+  return undefined;
 };
