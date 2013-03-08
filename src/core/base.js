@@ -39,41 +39,33 @@ Base.prototype.rawDates = function(dates,ids) {
   return dates;
 };
 
-Base.prototype.point = function(d,cache) {
-  var res = 0;
-  this.value(d,cache).forEach(function(e) {
-    if (e.x == d) res =  e.y;
-  });
-  return res;
-};
-
-
-Base.prototype.value = function(dates,cache) {
-  return this.get(dates,cache)[this.ID];
-};
-
-Base.prototype.y = function(dates,cache) {
-  return this.value(dates,cache).map(function(d) {
-    return d.y;
-  });
-};
+Base.prototype.y = function(dates) {
+  return this.exec(dates)[this.ID];
+}
 
 Base.prototype.x = function(dates,cache) {
   return this.dates(dates);
 };
 
-Base.prototype.get = function(dates,cache) {
-  if (!cache) cache = {};
-  var allDates = cache.__dates__ = this.dates(dates),
-      l = allDates.length; 
+Base.prototype.val = function(dates) {
+  var cache = this.exec(dates);
+  return cache[this.ID].map(function(d,i) {
+    return {x:cache.__dates__[i],y:d};
+  });
+}
 
-  if (!cache.__dt__) cache.__dt__ = allDates.map(function(d,i) { 
-    return (d-(allDates[i-1] || allDates[0]))/ DAYMS;
+Base.prototype.exec = function(d) {
+  var cache = {},
+      dates = cache.__dates__ = this.dates(d),
+      l = dates.length; 
+
+  if (!cache.__dt__) cache.__dt__ = dates.map(function(d,i) { 
+    return (d-(dates[i-1] || dates[0]))/ DAYMS;
   });
   
   if (!cache[this.ID]) cache[this.ID] = [];
   
-  allDates.every(function(d,i) {
+  dates.every(function(d,i) {
     this.fetch(cache,d,i);
     return (cache[this.ID].length != l);   // break if we have all values
   },this);
@@ -85,9 +77,9 @@ Base.prototype.fetch = function(cache,d,i) {
   if (!cache[this.ID]) cache[this.ID] = [];
   if (cache[this.ID][i] === undefined) {
     var res = this.fn(cache,d,i);
-    if (!cache[this.ID][i]) cache[this.ID][i] = {x:d,y:res};
+    if (!cache[this.ID][i]) cache[this.ID][i] = res;
   }
-  return cache[this.ID][i].y;
+  return cache[this.ID][i];
 };
 
 [Cumul,Diff,Last,Max,Min,Neg].forEach(function(Fn) {

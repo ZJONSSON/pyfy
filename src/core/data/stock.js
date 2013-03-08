@@ -13,5 +13,5 @@ pyfy.stock = function(d) {
 Stock.prototype = new Data();
 
 Stock.prototype._fn = function(d,last) {
-  return last;
+  return last.y;
 };

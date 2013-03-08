@@ -54,17 +54,17 @@ Data.prototype.fn = function(cache,d,i) {
       last = this.data[dates[dates.length-1]];
 
   cache[this.ID] = cache.__dates__.map(function(d) {
-    if (!Object.keys(self.data).length) return {x:0,y:0};
+    if (!Object.keys(self.data).length) return 0;
     while (dates.length) {
       var next = self.data[dates[0]];
-      if (d == next.x) return next;
+      if (d == next.x) return next.y;
       if (d < next.x) return self._fn(d,prev,next);
       prev = next;
       dates = dates.slice(1);
     }
-    return last;
+    return last.y;
   });
-  return cache[this.ID][i].y;
+  return cache[this.ID][i];
 };
 
 Data.prototype._fn = function(d,prev,next) {

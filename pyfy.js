@@ -46,32 +46,28 @@
     }
     return dates;
   };
-  Base.prototype.point = function(d, cache) {
-    var res = 0;
-    this.value(d, cache).forEach(function(e) {
-      if (e.x == d) res = e.y;
-    });
-    return res;
-  };
-  Base.prototype.value = function(dates, cache) {
-    return this.get(dates, cache)[this.ID];
-  };
-  Base.prototype.y = function(dates, cache) {
-    return this.value(dates, cache).map(function(d) {
-      return d.y;
-    });
+  Base.prototype.y = function(dates) {
+    return this.exec(dates)[this.ID];
   };
   Base.prototype.x = function(dates, cache) {
     return this.dates(dates);
   };
-  Base.prototype.get = function(dates, cache) {
-    if (!cache) cache = {};
-    var allDates = cache.__dates__ = this.dates(dates), l = allDates.length;
-    if (!cache.__dt__) cache.__dt__ = allDates.map(function(d, i) {
-      return (d - (allDates[i - 1] || allDates[0])) / DAYMS;
+  Base.prototype.val = function(dates) {
+    var cache = this.exec(dates);
+    return cache[this.ID].map(function(d, i) {
+      return {
+        x: cache.__dates__[i],
+        y: d
+      };
+    });
+  };
+  Base.prototype.exec = function(d) {
+    var cache = {}, dates = cache.__dates__ = this.dates(d), l = dates.length;
+    if (!cache.__dt__) cache.__dt__ = dates.map(function(d, i) {
+      return (d - (dates[i - 1] || dates[0])) / DAYMS;
     });
     if (!cache[this.ID]) cache[this.ID] = [];
-    allDates.every(function(d, i) {
+    dates.every(function(d, i) {
       this.fetch(cache, d, i);
       return cache[this.ID].length != l;
     }, this);
@@ -81,12 +77,9 @@
     if (!cache[this.ID]) cache[this.ID] = [];
     if (cache[this.ID][i] === undefined) {
       var res = this.fn(cache, d, i);
-      if (!cache[this.ID][i]) cache[this.ID][i] = {
-        x: d,
-        y: res
-      };
+      if (!cache[this.ID][i]) cache[this.ID][i] = res;
     }
-    return cache[this.ID][i].y;
+    return cache[this.ID][i];
   };
   [ Cumul, Diff, Last, Max, Min, Neg ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(d) {
@@ -184,20 +177,17 @@
   Data.prototype.fn = function(cache, d, i) {
     var self = this, dates = this.dates(), prev = this.data[dates[0]], last = this.data[dates[dates.length - 1]];
     cache[this.ID] = cache.__dates__.map(function(d) {
-      if (!Object.keys(self.data).length) return {
-        x: 0,
-        y: 0
-      };
+      if (!Object.keys(self.data).length) return 0;
       while (dates.length) {
         var next = self.data[dates[0]];
-        if (d == next.x) return next;
+        if (d == next.x) return next.y;
         if (d < next.x) return self._fn(d, prev, next);
         prev = next;
         dates = dates.slice(1);
       }
-      return last;
+      return last.y;
     });
-    return cache[this.ID][i].y;
+    return cache[this.ID][i];
   };
   Data.prototype._fn = function(d, prev, next) {
     return undefined;
@@ -213,12 +203,9 @@
   Flow.prototype.fn = function(cache, d, i) {
     var self = this;
     cache[this.ID] = cache.__dates__.map(function(d) {
-      return self.data[d] || {
-        x: d,
-        y: 0
-      };
+      return self.data[d] ? self.data[d].y : 0;
     });
-    return cache[this.ID][i].y;
+    return cache[this.ID][i];
   };
   function Stock() {
     Data.apply(this, arguments);
@@ -229,7 +216,7 @@
   };
   Stock.prototype = new Data();
   Stock.prototype._fn = function(d, last) {
-    return last;
+    return last.y;
   };
   pyfy.Price = Price;
   pyfy.price = function(d) {
@@ -240,11 +227,8 @@
   }
   Price.prototype = new Data();
   Price.prototype._fn = function(d, prev, next) {
-    if (next.x == prev.x) return prev;
-    if (d < next.x) return {
-      x: d,
-      y: prev.y + (next.y - prev.y) * (d - prev.x) / (next.x - prev.x)
-    };
+    if (next.x == prev.x) return prev.y;
+    if (d < next.x) return prev.y + (next.y - prev.y) * (d - prev.x) / (next.x - prev.x);
   };
   pyfy.interval = function(start, dm, no, val) {
     var interval = [];
@@ -363,6 +347,7 @@
     this.right = right;
     this.op = op;
   }
+  pyfy.Operator = Operator;
   Operator.prototype = new Base();
   Operator.prototype.inputs = function() {
     return [ this.left, this.right ];
