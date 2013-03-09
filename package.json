@@ -1,0 +1,26 @@
+{
+  "name": "pyfy",
+  "version": "0.0.1",
+  "description": "PYFY Valuation Framework",
+  "license": "Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)",
+  "keywords": [
+    "finance",
+    "timeseries"
+  ],
+  "homepage": "https://github.com/ZJONSSON/pyfy",
+  "author": {
+    "name": "Ziggy Jonsson",
+    "url": "https://github.com/ZJONSSON"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZJONSSON/pyfy.git"
+  },
+  "devDependencies": {
+    "uglify-js2": "2.1.11",
+    "vows": "0.7.0"
+  },
+  "scripts": {
+    "test": "./node_modules/vows/bin/vows"
+  }
+}
