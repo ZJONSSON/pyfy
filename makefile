@@ -1,7 +1,8 @@
 # Libraries
 
-NODEPATH ?= "../dpl/node_modules"
+NODEPATH ?= "./node_modules"
 JS_UGLIFY = $(NODEPATH)/uglify-js2/bin/uglifyjs2
+JS_TESTER = $(NODEPATH)/vows/bin/vows
 
 all: \
 	pyfy.js \
@@ -42,4 +43,6 @@ pyfy.js: Makefile
 pyfy.min.js: pyfy.js Makefile
 	@rm -f $@
 	$(JS_UGLIFY) $< -c --comments -m -o $@
-	
+
+test: all
+	@$(JS_TESTER)
