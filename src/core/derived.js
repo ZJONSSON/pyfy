@@ -15,7 +15,7 @@ Derived.prototype.inputs = function() {
 };
 
 Derived.prototype.fn= function(cache,d,i) {
-  return this.parent.fetch(cache,d,i);
+  return this.parent ? this.parent.fetch(cache,d,i) : 0;
 };
 
 Derived.prototype.setParent = function(d) {
