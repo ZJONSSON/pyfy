@@ -1,36 +1,35 @@
 var vows = require("vows"),
   assert = require("assert"),
-  pyfy = require("../pyfy.js");
-
-var d = [{x:new Date(2013,1,3),y:100},{x:new Date(2013,6,4),y:200}];
+  pyfy = require("../pyfy.js"),
+  testData = require("./testData.js");
 
 var suite = vows.describe("data");
 
 suite.addBatch({
   "empty" : {
     topic : new pyfy.Data(),
-    "has base as prototype" : function(data) {
-      assert.isTrue(pyfy.Base.prototype.isPrototypeOf(data));
+    "has base as prototype" : function(_) {
+      assert.isTrue(pyfy.Base.prototype.isPrototypeOf(_));
     },
-    "returns zero length array if empty" : function(data) {
-      assert.deepEqual(data.y(),[]);
+    "returns zero length array if empty" : function(_) {
+      assert.deepEqual(_.y(),[]);
     },
-    "returns array of zero for specified date" : function(data) {
-      assert.deepEqual(data.y([new Date()]),[0]);
+    "returns array of zero for specified date" : function(_) {
+      assert.deepEqual(_.y([new Date()]),[0]);
     }
   },
   "with data" : {
-    topic : new pyfy.Data(d),
-    "rawDates match inputs" : function(data) {
+    topic : new pyfy.Data(testData.a),
+    "rawDates match inputs" : function(_) {
       var expected = {};
-      d.forEach(function(d) {
+      testData.a.forEach(function(d) {
         expected[d.x] = d.x;
       });
-      assert.deepEqual(data.rawDates(),expected);
+      assert.deepEqual(_.rawDates(),expected);
     },
-    "dates match inputs" : function(data) {
-      var expected = d.map(function(d) { return d.x; }).sort();
-      assert.deepEqual(data.dates(),expected);
+    "dates match inputs" : function(_) {
+      var expected = testData.a.map(function(d) { return d.x; }).sort();
+      assert.deepEqual(_.dates(),expected);
     }
   }
 });

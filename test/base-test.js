@@ -15,8 +15,8 @@ suite.addBatch({
   },
   'rawDates' : {
     topic : pyfy.base(),
-    'returns empty object by default' : function (base) {
-      assert.isEmpty(Object.keys(base.rawDates()));
+    'returns empty object by default' : function (_) {
+      assert.isEmpty(Object.keys(_.rawDates()));
     }
   }
 });

@@ -1,23 +1,21 @@
 var vows = require("vows"),
   assert = require("assert"),
-  pyfy = require("../../pyfy.js");
-
-var data = [{x:new Date(2013,1,3),y:100},{x:new Date(2013,6,4),y:200}];
-
+  pyfy = require("../../pyfy.js"),
+  testData = require("../testData.js");
 
 var suite = vows.describe("price");
 
 suite.addBatch({
   "with basic data" : {
-    topic : pyfy.price(data),
-    "has data prototype" : function(price) {
-      assert.isTrue(pyfy.Data.prototype.isPrototypeOf(price));
+    topic : pyfy.price(testData.a),
+    "has data prototype" : function(_) {
+      assert.isTrue(pyfy.Data.prototype.isPrototypeOf(_));
     },    
-    "returns input values" : function(price) {
-      assert.deepEqual(price.y(),[100,200]);
+    "returns input values" : function(_) {
+      assert.deepEqual(_.y(),[100,120,-10]);
     },
-    "returns last value with extrapolation" : function(price) {
-      assert.deepEqual(price.y([new Date(2012,1,1),new Date(2013,2,2),new Date(2014,1,1)]),[100,100,117.88573005796302,200,200]);
+    "returns last value with extrapolation" : function(_) {
+      assert.deepEqual(_.y(testData.dates),[100,100,100,107.86329535982217,120,-10,-10]);
     }
   }
 });

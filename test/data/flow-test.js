@@ -1,31 +1,30 @@
 var vows = require("vows"),
   assert = require("assert"),
-  pyfy = require("../../pyfy.js");
-
-var data = [{x:new Date(2013,1,3),y:100},{x:new Date(2013,6,4),y:200}];
+  pyfy = require("../../pyfy.js"),
+  testData = require("../testData.js");
 
 var suite = vows.describe("flow");
 
 suite.addBatch({
   "empty" : {
     topic : pyfy.flow(),
-    "has data as prototype" : function(flow) {
-      assert.isTrue(pyfy.Data.prototype.isPrototypeOf(flow));
+    "has data as prototype" : function(_) {
+      assert.isTrue(pyfy.Data.prototype.isPrototypeOf(_));
     },
-    "returns zero length array if empty" : function(flow) {
-      assert.deepEqual(flow.y(),[]);
+    "returns zero length array if empty" : function(_) {
+      assert.deepEqual(_.y(),[]);
     },
-    "returns array of zero for specified date" : function(flow) {
-      assert.deepEqual(flow.y(new Date()),[0]);
+    "returns array of zero for specified date" : function(_) {
+      assert.deepEqual(_.y(new Date()),[0]);
     }
   },
   "with data" : {
-    topic : pyfy.flow(data),
-    "returns input values" : function(flow) {
-      assert.deepEqual(flow.y(),[100,200]);
+    topic : pyfy.flow(testData.a),
+    "returns input values" : function(_) {
+      assert.deepEqual(_.y(),[100,120,-10]);
     },
-    "returns zeros for dates with no data" : function(flow) {
-      assert.deepEqual(flow.y([new Date(2012,1,1),new Date(2013,2,2),new Date(2014,1,1)]),[0,100,0,200,0]);
+    "returns zeros for dates with no data" : function(_) {
+      assert.deepEqual(_.y(testData.dates),[0, 0, 100, 0,  120, -10, 0]);
     }
   }
 });
