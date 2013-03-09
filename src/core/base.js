@@ -41,7 +41,8 @@ Base.prototype.rawDates = function(dates,ids) {
 
 Base.prototype.y = function(dates) {
   return this.exec(dates)[this.ID];
-}
+};
+
 
 Base.prototype.x = function(dates,cache) {
   return this.dates(dates);
@@ -52,7 +53,7 @@ Base.prototype.val = function(dates) {
   return cache[this.ID].map(function(d,i) {
     return {x:cache.__dates__[i],y:d};
   });
-}
+};
 
 Base.prototype.exec = function(d) {
   var cache = {},
@@ -102,4 +103,8 @@ Base.prototype.derived = function(fn) {
 
 Base.prototype.period = function(min,max) {
   return new Period(this,min,max);
+};
+
+Base.prototype.fn = function() {
+  return 0;
 };

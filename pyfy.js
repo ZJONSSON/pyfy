@@ -99,8 +99,11 @@
   Base.prototype.period = function(min, max) {
     return new Period(this, min, max);
   };
+  Base.prototype.fn = function() {
+    return 0;
+  };
   function Const(d) {
-    this.const = d;
+    this.const = d || 0;
   }
   pyfy.const = pyfy.c = function(d) {
     Base.apply(this, arguments);
@@ -243,7 +246,7 @@
   pyfy.Derived = Derived;
   function Derived(d, fn) {
     Base.call(this, arguments);
-    this.parent = d;
+    this.parent = d || new Base();
     if (fn) this.fn = fn;
   }
   Derived.prototype = new Base();
@@ -251,7 +254,7 @@
     return this.parent;
   };
   Derived.prototype.fn = function(cache, d, i) {
-    return this.parent ? this.parent.fetch(cache, d, i) : 0;
+    return this.parent.fetch(cache, d, i);
   };
   Derived.prototype.setParent = function(d) {
     this.parent = d;

@@ -1,7 +1,7 @@
 /*global pyfy,Base*/
 
 function Const(d) {
-  this.const = d;
+  this.const = d || 0;
 }
 
 pyfy.const = pyfy.c = function(d) {

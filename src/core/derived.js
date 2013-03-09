@@ -4,7 +4,7 @@ pyfy.Derived = Derived ;
 
 function Derived(d,fn) {
   Base.call(this,arguments);
-  this.parent = d;
+  this.parent = d || new Base();
   if (fn) this.fn = fn;
 }
 
@@ -15,7 +15,7 @@ Derived.prototype.inputs = function() {
 };
 
 Derived.prototype.fn= function(cache,d,i) {
-  return this.parent ? this.parent.fetch(cache,d,i) : 0;
+  return this.parent.fetch(cache,d,i);
 };
 
 Derived.prototype.setParent = function(d) {
