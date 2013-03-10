@@ -78,7 +78,7 @@ Base.prototype.fetch = function(cache,d,i) {
   if (!cache[this.ID]) cache[this.ID] = [];
   if (cache[this.ID][i] === undefined) {
     var res = this.fn(cache,d,i);
-    if (!cache[this.ID][i]) cache[this.ID][i] = res;
+    if (res !== undefined) cache[this.ID][i] = res;
   }
   return cache[this.ID][i];
 };
