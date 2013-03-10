@@ -7,9 +7,25 @@
   var pyfy = this.pyfy = {};
   if (typeof module !== "undefined") module.exports = pyfy;
   var DAYMS = 1e3 * 60 * 60 * 24;
-  function today() {
-    return new Date(Math.floor(new Date() / DAYMS) * DAYMS + 1e3 * 60 * 60 * 5);
-  }
+  pyfy.util = {};
+  pyfy.util.dateParts = function(d) {
+    var res = {
+      y: d.getFullYear(),
+      m: d.getMonth(),
+      d: d.getDate()
+    };
+    res.date = new Date(res.y, res.m, res.d);
+    res.lastofMonth = new Date(res.y, res.m, res.d + 1).getMonth() == res.m + 1;
+    res.lastFeb = res.m == 2 && res.lastofMonth;
+    return res;
+  };
+  pyfy.util.today = function() {
+    return pyty.util.dateParts(new Date());
+  };
+  pyfy.util.nextDay = function(d, i) {
+    if (i === undefined) i = 0;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + i);
+  };
   function ascending(a, b) {
     return +a - b;
   }
@@ -62,7 +78,9 @@
     });
   };
   Base.prototype.exec = function(d) {
-    var cache = {}, dates = cache.__dates__ = this.dates(d), l = dates.length;
+    var cache = {
+      result: {}
+    }, dates = cache.__dates__ = this.dates(d), l = dates.length;
     if (!cache.__dt__) cache.__dt__ = dates.map(function(d, i) {
       return (d - (dates[i - 1] || dates[0])) / DAYMS;
     });
@@ -77,7 +95,7 @@
     if (!cache[this.ID]) cache[this.ID] = [];
     if (cache[this.ID][i] === undefined) {
       var res = this.fn(cache, d, i);
-      if (!cache[this.ID][i]) cache[this.ID][i] = res;
+      if (res !== undefined) cache[this.ID][i] = res;
     }
     return cache[this.ID][i];
   };
@@ -362,6 +380,77 @@
     left = fetch(this.left, cache, d, i);
     return ops[this.op](left, right);
   };
+  pyfy.daycount = pyfy.daycount || {};
+  pyfy.daycount.d_30_360 = function(d1, d2) {
+    if (d1.d == 31) d1.d = 30;
+    if (d1.d == 30 && d2.d == 31) d2.d = 30;
+    return (360 * (d2.y - d1.y) + 30 * (d2.m - d1.m) + (d2.d - d1.d)) / 360;
+  };
+  pyfy.daycount.d_30E_360 = function(d1, d2) {
+    if (d1.d == 31) d1.d = 30;
+    if (d2.d == 31) d2.d = 30;
+    return (360 * (d2.y - d1.y) + 30 * (d2.m - d1.m) + (d2.d - d1.d)) / 360;
+  };
+  pyfy.daycount.d_30_360US = function(d1, d2) {
+    if (d1.lastofFeb && d2.lastofFeb) d2.d = 30;
+    if (d1.lastofFeb) d1.d = 30;
+    if (d2.d == 31 && (d1.d == 30 || d1.d == 31)) d2.d = 30;
+    if (d1.d == 31) d1.d = 30;
+    return (360 * (d2.y - d1.y) + 30 * (d2.m - d1.m) + (d2.d - d1.d)) / 360;
+  };
+  pyfy.daycount.d_act_360 = function(d1, d2) {
+    return Math.round((d2.date - d1.date) / DAYMS) / 360;
+  };
+  pyfy.daycount.d_act_act = function(d1, d2) {
+    var dct = 0, _d1 = d1.date, _d2 = new Date(Math.min(new Date(_d1.getFullYear() + 1, 0, 1), d2.date));
+    while (_d1 < d2.date) {
+      var testDate = new Date(_d1.getFullYear(), 1, 29), denom = testDate.getDate() == 29 ? 366 : 365;
+      dct += Math.round((_d2 - _d1) / DAYMS) / denom;
+      _d1 = _d2;
+      _d2 = new Date(Math.min(new Date(_d1.getFullYear() + 1, 0, 1), d2.date));
+    }
+    return dct;
+  };
+  pyfy.Dcf = Dcf;
+  pyfy.dcf = function(a, b, c) {
+    return new Dcf(a, b, c);
+  };
+  function Dcf(dates, daycount, calendar) {
+    Base.apply(this, arguments);
+    if (dates) dates = [].concat(dates).sort(ascending);
+    this.customDates = dates;
+    if (arguments.length > 1) this.daycount = daycount;
+  }
+  Dcf.prototype = new Base();
+  Dcf.prototype.rawDates = function(dates) {
+    dates = dates || {};
+    if (this.customDates) {
+      [].concat(this.customDates).forEach(function(d) {
+        d = this.calendar(d);
+        dates[d] = d;
+      }, this);
+    }
+    return dates;
+  };
+  Dcf.prototype.fn = function(cache) {
+    var res = {}, dates = this.dates();
+    if (!dates.length) dates = cache.__dates__;
+    dates.slice(1).map(function(d, i) {
+      var d1 = pyfy.util.dateParts(dates[i]), d2 = pyfy.util.dateParts(d);
+      res[d] = this.daycount(d1, d2);
+    }, this);
+    cache[this.ID] = cache.__dates__.map(function(d) {
+      return res[d] || 0;
+    });
+  };
+  Dcf.prototype.calendar = function(d) {
+    return d;
+  };
+  Dcf.prototype.daycount = pyfy.daycount.d_30_360;
+  Dcf.prototype.setDaycount = function(d) {
+    this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
+    return this;
+  };
   pyfy.ir = function(d) {
     return new Ir(d);
   };
@@ -370,6 +459,7 @@
     this.df = new Df(this);
   }
   Ir.prototype = new Stock();
+  Ir.prototype.daycount = pyfy.dcf();
   pyfy.df = function(d) {
     return new Df(d);
   };

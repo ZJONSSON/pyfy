@@ -29,6 +29,13 @@ all: \
 	src/core/deriv/min.js \
 	src/core/deriv/neg.js \
 	src/core/operator.js \
+	src/market/daycount/daycount.js \
+	src/market/daycount/d_30_360.js \
+	src/market/daycount/d_30E_360.js \
+	src/market/daycount/d_30_360US.js \
+	src/market/daycount/d_act_360.js \
+	src/market/daycount/d_act_act.js \
+	src/market/dcf.js \
 	src/market/ir.js \
 	src/stat/ziggurat.js \
 	src/stat/norm.js \

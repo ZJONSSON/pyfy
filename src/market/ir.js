@@ -11,6 +11,8 @@ function Ir() {
 
 Ir.prototype = new Stock();
 
+Ir.prototype.daycount = pyfy.dcf();
+
 pyfy.df = function(d) {
   return new Df(d);
 };
