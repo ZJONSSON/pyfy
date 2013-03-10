@@ -61,7 +61,7 @@ Base.prototype.exec = function(d) {
       l = dates.length; 
 
   if (!cache.__dt__) cache.__dt__ = dates.map(function(d,i) { 
-    return (d-(dates[i-1] || dates[0]))/ DAYMS;
+    return (d-(dates[i-1] || dates[0]))/ pyfy.util.DAYMS;
   });
   
   if (!cache[this.ID]) cache[this.ID] = [];

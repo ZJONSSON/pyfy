@@ -6,8 +6,8 @@
 (function() {
   var pyfy = this.pyfy = {};
   if (typeof module !== "undefined") module.exports = pyfy;
-  var DAYMS = 1e3 * 60 * 60 * 24;
   pyfy.util = {};
+  pyfy.util.DAYMS = 1e3 * 60 * 60 * 24;
   pyfy.util.dateParts = function(d) {
     var res = {
       y: d.getFullYear(),
@@ -78,11 +78,9 @@
     });
   };
   Base.prototype.exec = function(d) {
-    var cache = {
-      result: {}
-    }, dates = cache.__dates__ = this.dates(d), l = dates.length;
+    var cache = {}, dates = cache.__dates__ = this.dates(d), l = dates.length;
     if (!cache.__dt__) cache.__dt__ = dates.map(function(d, i) {
-      return (d - (dates[i - 1] || dates[0])) / DAYMS;
+      return (d - (dates[i - 1] || dates[0])) / pyfy.util.DAYMS;
     });
     if (!cache[this.ID]) cache[this.ID] = [];
     dates.every(function(d, i) {
@@ -399,13 +397,13 @@
     return (360 * (d2.y - d1.y) + 30 * (d2.m - d1.m) + (d2.d - d1.d)) / 360;
   };
   pyfy.daycount.d_act_360 = function(d1, d2) {
-    return Math.round((d2.date - d1.date) / DAYMS) / 360;
+    return Math.round((d2.date - d1.date) / pyfy.util.DAYMS) / 360;
   };
   pyfy.daycount.d_act_act = function(d1, d2) {
     var dct = 0, _d1 = d1.date, _d2 = new Date(Math.min(new Date(_d1.getFullYear() + 1, 0, 1), d2.date));
     while (_d1 < d2.date) {
       var testDate = new Date(_d1.getFullYear(), 1, 29), denom = testDate.getDate() == 29 ? 366 : 365;
-      dct += Math.round((_d2 - _d1) / DAYMS) / denom;
+      dct += Math.round((_d2 - _d1) / pyfy.util.DAYMS) / denom;
       _d1 = _d2;
       _d2 = new Date(Math.min(new Date(_d1.getFullYear() + 1, 0, 1), d2.date));
     }

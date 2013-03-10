@@ -1,11 +1,11 @@
-var DAYMS = 1000*60*60*24
+
 function dmonth(DisplayTo,DisplayFrom) {
   return DisplayTo.getMonth() - DisplayFrom.getMonth() + (12 * (DisplayTo.getFullYear() - DisplayFrom.getFullYear()));
 }
 
 
 days360 = function(d1,d2) {
-  return Math.abs(d1-d2)/DAYMS /365*360
+  return Math.abs(d1-d2)/pyfy.util.DAYMS /365*360
 }
 
 

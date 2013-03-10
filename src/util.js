@@ -1,6 +1,6 @@
-var DAYMS = 1000*60*60*24;
-
 pyfy.util = {};
+
+pyfy.util.DAYMS = 1000*60*60*24;
 
 pyfy.util.dateParts = function(d) {
   var res =  {

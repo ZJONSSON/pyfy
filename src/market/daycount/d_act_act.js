@@ -7,7 +7,7 @@ pyfy.daycount.d_act_act = function(d1,d2) {
   while (_d1 < d2.date) {
     var  testDate = (new Date(_d1.getFullYear(),1,29)),
           denom = (testDate.getDate() == 29) ? 366 : 365;
-    dct += Math.round((_d2 -_d1) / DAYMS) / denom;
+    dct += Math.round((_d2 -_d1) / pyfy.util.DAYMS) / denom;
     _d1 = _d2;
     _d2 = new Date(Math.min(new Date(_d1.getFullYear()+1,0,1),d2.date));
   }
