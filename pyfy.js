@@ -415,9 +415,9 @@
   };
   function Dcf(dates, daycount, calendar) {
     Base.apply(this, arguments);
-    if (dates) dates = [].concat(dates).sort(ascending);
     this.customDates = dates;
-    if (arguments.length > 1) this.daycount = daycount;
+    if (daycount !== undefined) this.daycount = daycount;
+    if (calendar !== undefined) this.calendar = calendar;
   }
   Dcf.prototype = new Base();
   Dcf.prototype.rawDates = function(dates) {

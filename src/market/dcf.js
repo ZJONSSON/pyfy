@@ -7,10 +7,9 @@ pyfy.dcf = function(a,b,c) {
 
 function Dcf(dates,daycount,calendar) {
   Base.apply(this,arguments);
-  if (dates) dates = [].concat(dates).sort(ascending);
-  this.customDates = dates
-  if (arguments.length > 1) this.daycount = daycount;
- //if (arguments.length > 2) this.calendar = calendar;
+  this.customDates = dates;
+  if (daycount !== undefined) this.daycount = daycount;
+  if (calendar !== undefined) this.calendar = calendar;
   
 }
 
