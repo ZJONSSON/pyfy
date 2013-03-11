@@ -11,10 +11,10 @@ function Flow() {
 
 Flow.prototype = new Data();
 
-Flow.prototype.fn = function(cache,d,i) {
+Flow.prototype.fn = function(res,d,i) {
   var self = this;
-  cache[this.ID] = cache.__dates__.map(function(d) {
+  res.cache[this.ID].values = res.dates.map(function(d) {
     return (self.data[d]) ? self.data[d].y : 0;
   });
-  return cache[this.ID][i];
+  return res.cache[this.ID].values[i];
 };

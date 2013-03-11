@@ -26,7 +26,7 @@ Norm.prototype.fn = function(cache,d,i) {
       self = this,
       dates = cache.__dates__;
       
-  var dt = cache.__dt__[i] /365,
+  var dt = (cache.dates[i] - (cache.dates[i-1] || cache.dates[0]))/365,
       s = (i>0)  ? this.fetch(cache,d,i-1) : this.s,
       r =   fetch(this.r,cache,d,i),
       vol =  fetch(this.vol,cache,d,i),

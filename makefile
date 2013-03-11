@@ -12,6 +12,7 @@ all: \
 .INTERMEDIATE pyfy.js: \
 	src/start.js \
 	src/util.js \
+	src/core/res.js \
 	src/core/base.js \
 	src/core/const.js \
 	src/core/sum.js \

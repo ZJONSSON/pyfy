@@ -1,4 +1,4 @@
-/*global Base*/
+/*global pyfy,Base,Res*/
 
 function Data(d) {
  Base.apply(this,arguments);
@@ -11,14 +11,15 @@ pyfy.Data = Data;
 
 Data.prototype = new Base();
 
-Data.prototype.rawDates = function(dates,ids) {
-  dates = dates || {};
-  ids = ids || {};
-  if (!ids[this.ID]) {
-    this._dates.forEach(function(e) { dates[e] = e;});
-    ids[this.ID] = true;
+Data.prototype.rawDates = function(res) {
+  res = res || new Res();
+  res.cache[this.ID] = res.cache[this.ID] || {};
+
+  if (!res.cache[this.ID].rawDates) {
+    this._dates.forEach(function(e) { res.rawDates[e] = e;});
+    res.cache[this.ID].rawDates = true;
   }
-  return dates;
+  return res.rawDates;
 };
 
 Data.prototype.update = function(a) {
@@ -47,13 +48,13 @@ Data.prototype.set = function(a) {
 };
 
 
-Data.prototype.fn = function(cache,d,i) {
+Data.prototype.fn = function(res,d,i) {
   var self = this,
       dates = this.dates(),
       prev = this.data[dates[0]],
       last = this.data[dates[dates.length-1]];
 
-  cache[this.ID] = cache.__dates__.map(function(d) {
+  res.cache[this.ID].values = res.dates.map(function(d) {
     if (!Object.keys(self.data).length) return 0;
     while (dates.length) {
       var next = self.data[dates[0]];
@@ -64,7 +65,7 @@ Data.prototype.fn = function(cache,d,i) {
     }
     return last.y;
   });
-  return cache[this.ID][i];
+  return res.cache[this.ID].values[i];
 };
 
 Data.prototype._fn = function(d,prev,next) {

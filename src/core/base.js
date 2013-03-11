@@ -1,4 +1,4 @@
-/*global pyfy,Cumul,Diff,Last,Max,Min,Neg,Derived,Filter*/
+/*global pyfy,Cumul,Diff,Last,Max,Min,Neg,Derived,Res,Period*/
 
 var ID=0;
 
@@ -12,75 +12,75 @@ pyfy.base = function() {
 
 pyfy.Base = Base;
 
-Base.prototype.dates = function(d) {
-  var dates = [],
-      rawDates = this.rawDates();
+Base.prototype.dates = function(d,res) {
+  res = res || new Res(this.ID);
+  res.dates = [];
 
-  if (d) [].concat(d).forEach(function(d) { rawDates[d]= d;}); // add user-dates if applicable
+  var rawDates = this.rawDates(res);
+      
+  // add user-dates if applicable
+  if (d) [].concat(d).forEach(function(d) {
+    res.rawDates[d]= d;
+  }); 
 
   for (var date in rawDates) {
-    dates.push(rawDates[date]);
+    res.dates.push(rawDates[date]);
   }
 
-  return dates.sort(ascending);
+  return res.dates.sort(ascending);
 };
 
-Base.prototype.rawDates = function(dates,ids) {
-  dates = dates || {};
-  ids = ids || {};
+Base.prototype.rawDates = function(res) {
+  res = res || new Res(this.ID);
+  res.cache[this.ID] = res.cache[this.ID] || {};
 
-  if (!ids[this.ID] && this.inputs) {
+  if (!res.cache[this.ID].rawDates && this.inputs) {
     var inputs = typeof this.inputs === "function" ? this.inputs() : this.inputs;
-    ids[this.ID] = true;
-    [].concat(this.inputs()).forEach(function(input) {
-      if (input.rawDates) input.rawDates(dates,ids);
+    res.cache[this.ID].rawDates = true;
+    [].concat(inputs).forEach(function(input) {
+      if (input.rawDates) input.rawDates(res);
     });
   }
-  return dates;
+  return res.rawDates;
 };
 
 Base.prototype.y = function(dates) {
-  return this.exec(dates)[this.ID];
+  return this.exec(dates).y(this.ID);
 };
 
-
-Base.prototype.x = function(dates,cache) {
+Base.prototype.x = function(dates) {
   return this.dates(dates);
 };
 
 Base.prototype.val = function(dates) {
-  var cache = this.exec(dates);
-  return cache[this.ID].map(function(d,i) {
-    return {x:cache.__dates__[i],y:d};
-  });
+  return this.exec(dates).val(this.ID);
 };
 
 Base.prototype.exec = function(d) {
-  var cache = {},
-      dates = cache.__dates__ = this.dates(d),
+  var res = new Res(),
+      dates = res.dates = this.dates(d),
       l = dates.length; 
 
-  if (!cache.__dt__) cache.__dt__ = dates.map(function(d,i) { 
-    return (d-(dates[i-1] || dates[0]))/ pyfy.util.DAYMS;
-  });
-  
-  if (!cache[this.ID]) cache[this.ID] = [];
+  res.cache[this.ID] = res.cache[this.ID] || {};
+  res.cache[this.ID].values = [];
   
   dates.every(function(d,i) {
-    this.fetch(cache,d,i);
-    return (cache[this.ID].length != l);   // break if we have all values
+    this.fetch(res,d,i);
+    return (res.cache[this.ID].values.length != l);   // break if we have all values
   },this);
   
-  return cache;
+  return res;
 };
 
-Base.prototype.fetch = function(cache,d,i) {
-  if (!cache[this.ID]) cache[this.ID] = [];
-  if (cache[this.ID][i] === undefined) {
-    var res = this.fn(cache,d,i);
-    if (res !== undefined) cache[this.ID][i] = res;
+Base.prototype.fetch = function(res,d,i) {
+  if (!res.cache[this.ID]) res.cache[this.ID] = {};
+  if (!res.cache[this.ID].values) res.cache[this.ID].values=[];
+
+  if (res.cache[this.ID].values[i] === undefined) {
+    var value = this.fn(res,d,i);
+    if (value !== undefined) res.cache[this.ID].values[i] = value;
   }
-  return cache[this.ID][i];
+  return res.cache[this.ID].values[i];
 };
 
 [Cumul,Diff,Last,Max,Min,Neg].forEach(function(Fn) {

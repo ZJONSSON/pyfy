@@ -15,19 +15,18 @@ function Dcf(dates,daycount,calendar) {
 
 Dcf.prototype = new Base();
 
-Dcf.prototype.rawDates = function(dates) {
-  dates = dates || {};
+Dcf.prototype.rawDates = function(res) {
+  res = res || new Res(this.ID);
   if (this.customDates) {
     [].concat(this.customDates).forEach(function(d) {
-      d = this.calendar(d);
-      dates[d] = d;
+      res.rawDates[d] = d;
     },this);
   }
-  return dates;
+  return res.rawDates;
 };
 
-Dcf.prototype.fn = function(cache) {
-  var res = {},
+Dcf.prototype.fn = function(res) {
+  var ownDates = {},
       dates = this.dates();
 
   if (!dates.length) dates = cache.__dates__;
@@ -35,11 +34,11 @@ Dcf.prototype.fn = function(cache) {
   dates.slice(1).map(function(d,i) {
     var d1 = pyfy.util.dateParts(dates[i]),
         d2 = pyfy.util.dateParts(d);
-    res[d] = this.daycount(d1,d2);
+    ownDates[d] = this.daycount(d1,d2);
   },this);
 
-  cache[this.ID] = cache.__dates__.map(function(d) {
-    return res[d] || 0;
+  res.cache[this.ID].values = res.dates.map(function(d) {
+    return ownDates[d] || 0;
   });
 };
 
