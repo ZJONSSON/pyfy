@@ -83,7 +83,7 @@ Base.prototype.fetch = function(res,d,i) {
   return res.cache[this.ID].values[i];
 };
 
-[Cumul,Diff,Last,Max,Min,Neg].forEach(function(Fn) {
+[Cumul,Diff,Last,Max,Min,Neg,Dcf].forEach(function(Fn) {
   Base.prototype[Fn.name.toLowerCase()] = function(d) {
     return new Fn(this,d);
   };

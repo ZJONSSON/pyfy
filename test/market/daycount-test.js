@@ -5,11 +5,11 @@ var vows = require("vows"),
 // Original test assumptions borrowed from:
 // http://www.deltaquants.com/day-count-conventions.html
 
-var testDates = [
-  [new Date(2007,11,28),new Date(2008,1,28)],
-  [new Date(2007,11,28),new Date(2008,1,29)],
-  [new Date(2007,9,31), new Date(2008,10,30)],
-  [new Date(2008,1,1), new Date(2009,4,31)]
+var tests = [
+  [{x:new Date(2007,11,28),y:1},{x:new Date(2008,1,28),y:1}],
+  [{x:new Date(2007,11,28),y:1},{x:new Date(2008,1,29),y:1}],
+  [{x:new Date(2007,9,31),y:1},{x:new Date(2008,10,30),y:1}],
+  [{x:new Date(2008,1,1),y:1},{x: new Date(2009,4,31),y:1}]
 ];
 
 var expected = {
@@ -50,8 +50,8 @@ var suite = vows.describe("daycount"),
     batch = {};
 
 function exec(key) {
-  return testDates.map(function(d) {
-    return pyfy.dcf(d,pyfy.daycount[key]).y()[1]
+  return tests.map(function(d) {
+    return pyfy.flow(d).dcf(key).y()[1]
   });
 }
 
