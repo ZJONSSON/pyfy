@@ -98,7 +98,7 @@
     return this.exec(dates).val(this.ID);
   };
   Base.prototype.exec = function(d) {
-    var res = new Res(), dates = res.dates = this.dates(d), l = dates.length;
+    var res = new Res(), dates = res.dates = this.dates(d, res), l = dates.length;
     res.cache[this.ID] = res.cache[this.ID] || {};
     res.cache[this.ID].values = [];
     dates.every(function(d, i) {
@@ -116,7 +116,7 @@
     }
     return res.cache[this.ID].values[i];
   };
-  [ Cumul, Diff, Last, Max, Min, Neg, Dcf ].forEach(function(Fn) {
+  [ Cumul, Diff, Last, Max, Min, Neg, Calendar, Dcf ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(d) {
       return new Fn(this, d);
     };
@@ -270,10 +270,10 @@
   };
   pyfy.interval = function(start, dm, no, val) {
     var interval = [];
-    for (var i = 0; i < no; i++) {
+    for (var i = 0; i < no + 1; i++) {
       interval.push({
-        x: start = new Date(start.getFullYear(), start.getMonth() + dm, start.getDate()),
-        y: val || 1
+        x: new Date(start.getFullYear(), start.getMonth() + i * dm, start.getDate()),
+        y: val || i == 0 ? 0 : 1
       });
     }
     return pyfy.flow(interval);
@@ -355,6 +355,38 @@
   Neg.prototype = new Derived();
   Neg.prototype.fn = function(cache, d, i) {
     return -this.parent.fetch(cache, d, i);
+  };
+  pyfy.Calendar = Calendar;
+  function Calendar(d, calendar) {
+    Derived.call(this, d);
+    if (calendar) this.calendar = calendar;
+  }
+  Calendar.prototype = new Derived();
+  Calendar.prototype.rawDates = function(res) {
+    res = res || new Res(this.ID);
+    var cache = res.cache[this.ID] = res.cache[this.ID] || {};
+    if (!cache.rawDates && this.parent) {
+      var parentRes = cache.parentRes = new Res(), parentDates = this.parent.dates([], parentRes);
+      cache.rawDates = true;
+      cache.dateMap = {};
+      parentDates.forEach(function(d, i) {
+        var ownDate = this.calendar(d);
+        res.rawDates[ownDate] = ownDate;
+        cache.dateMap[ownDate] = {
+          d: d,
+          i: i
+        };
+      }, this);
+    }
+    return res.rawDates;
+  };
+  Calendar.prototype.fn = function(res, d, i) {
+    var cache = res.cache[this.ID], dateMap = cache.dateMap[d];
+    return dateMap ? this.parent.fetch(cache.parentRes, dateMap.d, dateMap.i) : 0;
+  };
+  Calendar.prototype.calendar = function(d) {
+    var weekday = d.getDay();
+    return weekday == 0 || weekday == 6 ? this.calendar(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) : d;
   };
   pyfy.Operator = Operator;
   var ops = {

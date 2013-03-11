@@ -58,7 +58,7 @@ Base.prototype.val = function(dates) {
 
 Base.prototype.exec = function(d) {
   var res = new Res(),
-      dates = res.dates = this.dates(d),
+      dates = res.dates = this.dates(d,res),
       l = dates.length; 
 
   res.cache[this.ID] = res.cache[this.ID] || {};
@@ -83,7 +83,7 @@ Base.prototype.fetch = function(res,d,i) {
   return res.cache[this.ID].values[i];
 };
 
-[Cumul,Diff,Last,Max,Min,Neg,Dcf].forEach(function(Fn) {
+[Cumul,Diff,Last,Max,Min,Neg,Calendar,Dcf].forEach(function(Fn) {
   Base.prototype[Fn.name.toLowerCase()] = function(d) {
     return new Fn(this,d);
   };

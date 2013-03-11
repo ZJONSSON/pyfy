@@ -29,6 +29,7 @@ all: \
 	src/core/deriv/max.js \
 	src/core/deriv/min.js \
 	src/core/deriv/neg.js \
+	src/core/deriv/calendar.js \
 	src/core/operator.js \
 	src/market/daycount/daycount.js \
 	src/market/daycount/d_30_360.js \
