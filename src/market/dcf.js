@@ -30,5 +30,5 @@ Dcf.prototype.setDaycount = function(d) {
     ? pyfy.daycount[d]
     : d;
   return this;
-}
+};
 
