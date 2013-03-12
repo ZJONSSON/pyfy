@@ -487,19 +487,19 @@
   function Ir() {
     Stock.apply(this, arguments);
     this.df = new Df(this);
+    this.dcf = new Dcf(this);
   }
   Ir.prototype = new Stock();
   pyfy.df = function(d) {
-    return new Df(d);
+    return new Derived(d);
   };
-  function Df(d, val) {
+  function Df(d, val, daycount) {
     Derived.call(this, d);
     this.val = val;
   }
-  Df.prototype = new Derived();
+  Df.prototype = new Dcf();
   Df.prototype.fn = function(cache, d, i) {
-    var self = this, dt = cache.__dt__[i] / 365;
-    return i === 0 ? 1 : fetch(this, cache, d, i - 1) * Math.exp(-fetch(self.parent, cache, d, i) * dt);
+    return i === 0 ? 1 : fetch(this, cache, d, i - 1) * Math.exp(-fetch(this.parent, cache, d, i) * fetch(this.parent.dcf, cache, d, i));
   };
   function Ziggurat() {
     var jsr = 123456789;
