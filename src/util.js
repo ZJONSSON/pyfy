@@ -3,6 +3,7 @@ pyfy.util = {};
 pyfy.util.DAYMS = 1000*60*60*24;
 
 pyfy.util.dateParts = function(d) {
+  d = new Date(d);
   var res =  {
     y : d.getFullYear(),
     m : d.getMonth(),
@@ -14,8 +15,9 @@ pyfy.util.dateParts = function(d) {
   return res;
 };
 
+
 pyfy.util.today = function() {
-  return pyty.util.dateParts(new Date());
+  return pyfy.util.dateParts(new Date()).date;
 };
 
 pyfy.util.nextDay = function(d,i) {
@@ -29,3 +31,17 @@ function ascending(a,b) { return +a-b;}
 function fetch(obj,cache,d,i) {
   return (obj.fetch) ? obj.fetch(cache,d,i) : obj;
 }
+
+
+/* bisect copied from d3.js @licence MIT (c) Mike Bostock */
+function f(d) { return d;}
+pyfy.util.bisect = function(a, x, lo, hi) {
+      if (arguments.length < 3) lo = 0;
+      if (arguments.length < 4) hi = a.length;
+      while (lo < hi) {
+        var mid = lo + hi >>> 1;
+        if (f.call(a, a[mid], mid) < x) lo = mid + 1;
+        else hi = mid;
+      }
+      return lo;
+    };
