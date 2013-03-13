@@ -8,7 +8,9 @@ function Diff(d) {
 
 Diff.prototype = new Derived();
 
-Diff.prototype.fn = function(cache,d,i) {
-  var last = Math.max(i-1,0);
-  return  +this.parent.fetch(cache,d,i)-(this.parent.fetch(cache,d,last) || 0);
+Diff.prototype.fn = function(res,d) {
+  var dates = this.dates(res),
+      datePos = res.cache[this.ID].datePos[d];
+
+  return (datePos) ? res.fetch(this.parent,d) - res.fetch(this.parent,dates[datePos-1]) : 0;
 };

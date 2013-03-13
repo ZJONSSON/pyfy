@@ -1,4 +1,4 @@
-/*global pyfy,Base,Res*/
+/*global pyfy,Base,ascending*/
 
 function Data(d) {
  Base.apply(this,arguments);
@@ -12,32 +12,34 @@ pyfy.Data = Data;
 Data.prototype = new Base();
 
 Data.prototype.rawDates = function(res) {
-  res = res || new Res();
-  res.cache[this.ID] = res.cache[this.ID] || {};
+  res = pyfy.res(this.ID,res)
+  var cache = res.cache[this.ID];
 
-  if (!res.cache[this.ID].rawDates) {
-    this._dates.forEach(function(e) { res.rawDates[e] = e;});
-    res.cache[this.ID].rawDates = true;
+  if (!cache.rawDates) {
+    cache.rawDates = {};
+    this._dates.forEach(function(e) {
+      cache.rawDates[e] = e;
+    });
   }
-  return res.rawDates;
+
+  return cache.rawDates;
 };
 
 Data.prototype.update = function(a) {
   if (arguments.length === 0) return this;
-  var self = this;
   if (!isNaN(a)) {
-    var x = today();
-    this.data[x] = {x:x,y:a};
+    var x = pyfy.util.today().valueOf();
+    this.data[x] = a;
   } else {
-    if (a.length === undefined) a = [a];
-    a.forEach(function(d) {
-      self.data[d.x] = d;
-    });
+    [].concat(a)
+      .forEach(function(d) {
+        this.data[d.x.valueOf()] = d.y;
+      },this);
   }
   this._dates = Object.keys(this.data)
     .map(function(key) {
-      return this.data[key].x;
-    },this)
+      return +key;
+    })
     .sort(ascending);
   return this;
 };
@@ -47,25 +49,17 @@ Data.prototype.set = function(a) {
   return this.update(a);
 };
 
+Data.prototype.fn = function(res,d) {
+  if (!Object.keys(this.data).length) return 0;
+  if (this.data[d]) return this.data[d];
 
-Data.prototype.fn = function(res,d,i) {
-  var self = this,
-      dates = this.dates(),
-      prev = this.data[dates[0]],
-      last = this.data[dates[dates.length-1]];
+  var dates = this.dates(),
+      next = pyfy.util.bisect(dates,d),
+      prev = next -1;
 
-  res.cache[this.ID].values = res.dates.map(function(d) {
-    if (!Object.keys(self.data).length) return 0;
-    while (dates.length) {
-      var next = self.data[dates[0]];
-      if (d == next.x) return next.y;
-      if (d < next.x) return self._fn(d,prev,next);
-      prev = next;
-      dates = dates.slice(1);
-    }
-    return last.y;
-  });
-  return res.cache[this.ID].values[i];
+  if (next == dates.length) next-=1;
+  if (next === 0) prev = 0;
+  return this._fn(d,dates[prev] || dates[next],dates[next]);
 };
 
 Data.prototype._fn = function(d,prev,next) {

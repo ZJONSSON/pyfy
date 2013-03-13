@@ -23,13 +23,14 @@ suite.addBatch({
     "rawDates match inputs" : function(_) {
       var expected = {};
       testData.a.forEach(function(d) {
-        expected[d.x] = d.x;
+        var x = d.x.valueOf();
+        expected[x] = x;
       });
       assert.deepEqual(_.rawDates(),expected);
     },
     "dates match inputs" : function(_) {
       var expected = testData.a.map(function(d) { return d.x; }).sort();
-      assert.deepEqual(_.dates(),expected);
+      assert.deepEqual(_.x(),expected);
     }
   }
 });

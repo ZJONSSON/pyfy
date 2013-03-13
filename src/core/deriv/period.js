@@ -10,6 +10,6 @@ function Period(d,start,fin) {
 
 Period.prototype = new Derived();
 
-Period.prototype.fn = function(cache,d,i) {
-  return (d>= this.start && d<= this.fin) ? this.parent.fetch(cache,d,i) : 0;
+Period.prototype.fn = function(res,d) {
+  return (d >= this.start && d<= this.fin) ? res.fetch(this.parent,d) : 0;
 };

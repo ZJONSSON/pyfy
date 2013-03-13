@@ -9,6 +9,6 @@ function Min(d,min) {
 
 Min.prototype = new Derived();
 
-Min.prototype.fn = function(cache,d,i) {
-  return Math.min(this.parent.fetch(cache,d,i),this.min);
+Min.prototype.fn = function(res,d) {
+  return Math.min(res.fetch(this.parent,d),this.min);
 };

@@ -1,4 +1,4 @@
-/*global pyfy,Base*/
+/*global pyfy,Base,fetch*/
 pyfy.Operator = Operator;
 
 var ops = {
@@ -30,11 +30,11 @@ Operator.prototype.inputs = function() {
   return [this.left,this.right];
 };
 
-Operator.prototype.fn = function(cache,d,i) {
+Operator.prototype.fn = function(res,d,i) {
   var left,right;
-  right = fetch(this.right,cache,d,i);
+  right = res.fetch(this.right,d);
   // We can bypass further evaluation if the right side is zero in a multiplication
   if (!right && this.op =="mul") return 0;
-  left = fetch(this.left,cache,d,i);
+  left = res.fetch(this.left,d);
   return ops[this.op](left,right);
 };

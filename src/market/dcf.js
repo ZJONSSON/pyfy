@@ -1,4 +1,4 @@
-/*global pyfy,Base*/
+/*global pyfy,Derived*/
 pyfy.Dcf = Dcf;
 
 function Dcf(parent,daycount) {
@@ -9,18 +9,16 @@ function Dcf(parent,daycount) {
 Dcf.prototype = new Derived();
 
 Dcf.prototype.fn = function(res) {
-  var dates = this.dates(),
-      ownDates = {};
+  var cache = res.cache[this.ID];
+  if (Object.keys(cache.values).length) return 0;
+  var dates = this.dates();
+  cache.values = {};
 
-  dates.slice(1).map(function(d,i) {
+  dates.slice(1).forEach(function(d,i) {
     var d1 = pyfy.util.dateParts(dates[i]),
         d2 = pyfy.util.dateParts(d);
-    ownDates[d] = this.daycount(d1,d2);
+    cache.values[d] = this.daycount(d1,d2);
   },this);
-
-  res.cache[this.ID].values = res.dates.map(function(d) {
-    return ownDates[d] || 0;
-  });
 };
 
 Dcf.prototype.daycount = pyfy.daycount.d_30_360;

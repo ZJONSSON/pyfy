@@ -11,10 +11,6 @@ function Flow() {
 
 Flow.prototype = new Data();
 
-Flow.prototype.fn = function(res,d,i) {
-  var self = this;
-  res.cache[this.ID].values = res.dates.map(function(d) {
-    return (self.data[d]) ? self.data[d].y : 0;
-  });
-  return res.cache[this.ID].values[i];
+Flow.prototype.fn = function(res,d) {
+  return this.data[d] || 0;
 };

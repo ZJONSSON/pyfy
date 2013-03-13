@@ -8,6 +8,9 @@ function Last(d) {
 
 Last.prototype = new Derived();
 
-Last.prototype.fn = function(cache,d,i) {
-  return 0 + (i>0 && (this.parent.fetch(cache,d,i-1)));
+Last.prototype.fn = function(res,d) {
+  var dates = this.dates(res),
+      datePos = res.cache[this.ID].datePos[d];
+
+  return (datePos > 0) ? res.fetch(this.parent,dates[datePos-1]) : 0;  
 };

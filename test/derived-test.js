@@ -25,7 +25,7 @@ suite.addBatch({
       assert.equal(_.inputs(),parent);
     },
     "dates are derived from parent" : function(_) {
-      assert.deepEqual(_.dates(),testData.a.map(function(d) { return d.x;}));
+      assert.deepEqual(_.x(),testData.a.map(function(d) { return d.x;}));
     },
     "values are derived from parent" : function(_) {
       assert.deepEqual(_.y(),[100,120,-10]);

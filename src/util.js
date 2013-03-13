@@ -28,11 +28,6 @@ pyfy.util.nextDay = function(d,i) {
 
 function ascending(a,b) { return +a-b;}
 
-function fetch(obj,cache,d,i) {
-  return (obj.fetch) ? obj.fetch(cache,d,i) : obj;
-}
-
-
 /* bisect copied from d3.js @licence MIT (c) Mike Bostock */
 function f(d) { return d;}
 pyfy.util.bisect = function(a, x, lo, hi) {

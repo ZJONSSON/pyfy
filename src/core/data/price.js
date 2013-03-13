@@ -12,6 +12,12 @@ function Price() {
 Price.prototype = new Data();
 
 Price.prototype._fn = function(d,prev,next) {
-  if (next.x == prev.x) return prev.y;
-  if (d < next.x) return prev.y+(next.y-prev.y)*(d-prev.x)/(next.x-prev.x);
+  var prevVal = this.data[prev],
+    nextVal = this.data[next];
+
+  if (prev == next) return nextVal;
+
+  return (prev < d < next)
+    ? prevVal+(nextVal-prevVal)*(d-prev)/(next-prev)
+    : nextVal;
 };
