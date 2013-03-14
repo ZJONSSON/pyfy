@@ -52,30 +52,6 @@ Base.prototype.rawDates = function(query) {
   return cache.rawDates;
 };
 
-
-Base.prototype.exec = function(d) {
-  var query = pyfy.query(this.ID);
-
-  var dates = this.dates(query);
-
-  if (d) {
-    d = this.dates().concat(d)
-      .map(function(d) {
-        return d.valueOf();
-      });
-
-    dates = dates
-      .concat(d)
-      .sort(ascending);
-  }
-
-  dates.forEach(function(d) {
-    query.fetch(this,d);
-  },this);
-
-  return query;
-};
-
 Base.prototype.fn = function() {
   return 0;
 };
