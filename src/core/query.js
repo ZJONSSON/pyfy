@@ -18,7 +18,7 @@ Query.prototype.getCache = function(obj) {
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
   if (!cache.dates) {
-   cache.dates = obj.dates()
+   cache.dates = obj.dates(this)
     .map(function(d) { return d.valueOf(); })
     .sort(ascending);
   }
