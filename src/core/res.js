@@ -16,20 +16,30 @@ Res.prototype.register = function(id) {
 };
 
 Res.prototype.y = function(id) {
+  if (typeof id === "object") id = id.ID;
   return this.dates.map(function(d) {
     return this.cache[id].values[d];
   },this);
 };
 
 Res.prototype.x = function() {
+  if (typeof id === "object") id = id.ID;
   return this.dates.map(function(d) {
     return new Date(d);
   });
 };
 
 Res.prototype.val = function(id) {
+  if (typeof id === "object") id = id.ID;
   return this.y(id).map(function(d,i) {
     return {x:new Date(this.dates[i]),y:d};
+  },this);
+};
+
+Res.prototype.get = function(obj,d) {
+  if (!d) d = obj.dates();
+  return [].concat(d).map(function(d) {
+    return this.fetch(obj,d);
   },this);
 };
 
