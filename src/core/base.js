@@ -14,11 +14,10 @@ pyfy.Base = Base;
 
 Base.prototype.dates = function(res) {
   res = res || new Res(this.ID);
-  var cache = res.cache[this.ID] = res.cache[this.ID] || {};
+  var cache = res.cache[this.ID] = res.cache[this.ID] || {values:{}};
 
   if (!cache.dates) {
-    this.rawDates(res);
-    var rawDates = cache.rawDates;
+    var rawDates = this.rawDates(res);
     cache.dates = [];
     cache.datePos = {};
 
