@@ -33,11 +33,6 @@ function Df(d,val) {
 
 Df.prototype = new Dcf();
 
-Df.prototype.rawDates = function(query) {
-  Base.prototype.rawDates.call(this,query);
-  return {};
-};
-
 Df.prototype.fn = function(query,d) {
   var dates = query.dates(this);
   var pos = pyfy.util.bisect(dates,d);
