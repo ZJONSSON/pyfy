@@ -12,8 +12,8 @@ pyfy.base = function() {
 
 pyfy.Base = Base;
 
-Base.prototype.dates = function() {
-  var rawDates = this.rawDates();
+Base.prototype.dates = function(query) {
+  var rawDates = this.rawDates(query);
   var dates = [];
   for (var date in rawDates) {
     dates.push(new Date(+rawDates[date]));
@@ -66,7 +66,7 @@ Base.prototype.y = function(dates) {
 };
 
 Base.prototype.x = function(dates) {
-  return pyfy.query().x(this,dates);
+  return pyfy.query().y(this,dates);
 };
 
 Base.prototype.val = function(dates) {
