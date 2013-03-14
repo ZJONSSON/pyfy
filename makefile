@@ -1,7 +1,8 @@
 # Libraries
 
-NODEPATH ?= "../n3/node_modules"
+NODEPATH ?= "./node_modules"
 JS_UGLIFY = $(NODEPATH)/uglify-js2/bin/uglifyjs2
+JS_TESTER = $(NODEPATH)/vows/bin/vows
 
 all: \
 	pyfy.js \
@@ -10,24 +11,34 @@ all: \
 
 .INTERMEDIATE pyfy.js: \
 	src/start.js \
-	src/defs.js \
+	src/util.js \
+	src/core/query.js \
 	src/core/base.js \
 	src/core/const.js \
-	src/core/data/data.js \
+	src/core/sum.js \
+	src/core/data.js \
 	src/core/data/flow.js \
 	src/core/data/stock.js \
 	src/core/data/price.js \
 	src/core/data/interval.js \
-	src/core/deriv/derived.js \
-	src/core/deriv/filter.js \
-	src/core/deriv/last.js \
+	src/core/derived.js \
+	src/core/deriv/period.js \
+	src/core/deriv/prev.js \
 	src/core/deriv/cumul.js \
 	src/core/deriv/diff.js \
-	src/core/sum.js \
 	src/core/deriv/max.js \
 	src/core/deriv/min.js \
 	src/core/deriv/neg.js \
+	src/core/deriv/acct.js \
+	src/core/deriv/calendar.js \
 	src/core/operator.js \
+	src/market/daycount/daycount.js \
+	src/market/daycount/d_30_360.js \
+	src/market/daycount/d_30E_360.js \
+	src/market/daycount/d_30_360US.js \
+	src/market/daycount/d_act_360.js \
+	src/market/daycount/d_act_act.js \
+	src/market/dcf.js \
 	src/market/ir.js \
 	src/stat/ziggurat.js \
 	src/stat/norm.js \
@@ -42,4 +53,6 @@ pyfy.js: Makefile
 pyfy.min.js: pyfy.js Makefile
 	@rm -f $@
 	$(JS_UGLIFY) $< -c --comments -m -o $@
-	
+
+test: all
+	@$(JS_TESTER)

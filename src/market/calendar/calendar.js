@@ -1,0 +1,1 @@
+pyfy.calendar = {};

@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Diff = Diff;
 
 function Diff(d) {
@@ -6,7 +8,9 @@ function Diff(d) {
 
 Diff.prototype = new Derived();
 
-Diff.prototype.fn = function(cache,d,i) {
-  var last = Math.max(i-1,0);
-  return  +this.parent.fetch(cache,d,i).y-(this.parent.fetch(cache,d,last).y || 0);
+Diff.prototype.fn = function(query,d) {
+  var dates = query.dates(this),
+      datePos = pyfy.util.bisect(dates,d);
+
+  return (datePos) ? query.fetch(this.parent,d) - query.fetch(this.parent,dates[datePos-1]) : 0;
 };

@@ -1,3 +1,5 @@
+/*global pyfy,Base*/
+
 pyfy.norm = function(s,vol,r) {
   return new Norm(s,vol,r);
 };
@@ -15,20 +17,20 @@ function Norm(s,r,vol) {
 
 Norm.prototype = new Base();
 
+Norm.prototype.inputs = function() {
+  return [this.s,this.r,this.vol]
+};
+
 Norm.prototype.fn = function(cache,d,i) {
   var s = this.s,
       self = this,
       dates = cache.__dates__;
-  
-  cache[this.ID] = dates
-    .map(function(d,i) { return d-(dates[i-1] || dates[0]) / DAYMS;})
-    .map(function(dt,i) {
-      var e = (self.r - Math.pow(self.vol,2)/2*dt + self.vol*Math.sqrt(dt)*rndNorm());
-      return {
-        x:dates[i],
-        y:s = s* Math.exp(e)
-      };
-    });
-  return cache[this.ID][i];
+      
+  var dt = (cache.dates[i] - (cache.dates[i-1] || cache.dates[0]))/365,
+      s = (i>0)  ? this.fetch(cache,d,i-1) : this.s,
+      r =   fetch(this.r,cache,d,i),
+      vol =  fetch(this.vol,cache,d,i),
+      e = (r - Math.pow(vol,2)/2)*dt + vol*Math.sqrt(dt)*rndNorm();
+  return s * Math.exp(e);
 };
 

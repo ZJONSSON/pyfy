@@ -1,15 +1,29 @@
+/*global pyfy,Base,Stock,Derived,Dcf*/
+
 pyfy.ir = function(d) {
   return new Ir(d);
 };
 
-function Ir(d) {
+function Ir() {
   Stock.apply(this,arguments);
+  this.df = new Df(this);
+  this.daycount = pyfy.daycount.d_30_360;
 }
 
 Ir.prototype = new Stock();
 
-Ir.prototype.df = function(val) {
-  return new Df(this,val);
+Ir.prototype.setDaycount = function(d) {
+  this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
+  return this;
+};
+
+Ir.prototype._fn = function(d,last,next) {
+  return this.data[next];
+};
+
+
+pyfy.df = function(d) {
+  return new Derived(d);
 };
 
 function Df(d,val) {
@@ -17,31 +31,21 @@ function Df(d,val) {
   this.val = val;
 }
 
-Df.prototype = new Derived();
+Df.prototype = new Dcf();
 
-Df.prototype.rawDates = function(dates,ids) {
-  ids = ids || {};
-  dates = dates || {};
-  if (!ids[this.ID]) {
-   this.parent.rawDates.apply(this.parent,dates,ids);
-   if (this.val) dates[this.val] = this.val;
-   ids[this.ID] = true;
-  }
-  return dates;
+Df.prototype.rawDates = function(query) {
+  Base.prototype.rawDates.call(this,query);
+  return {};
 };
 
-Df.prototype.fn = function(cache,d,i) {
-  var self = this,
-      last = 1,
-      lastDate = this.val || cache.__dates__[0];
+Df.prototype.fn = function(query,d) {
+  var dates = query.dates(this);
+  var pos = pyfy.util.bisect(dates,d);
+  var last =dates[pos-1];
+  if (!last) return d==dates[pos] ? 1 : 0;
 
-  cache[this.ID] = cache.__dates__.map(function(d,i) {
-    var res = {x:d,y:0};
-    if (d>=lastDate) {
-      res.y = last = last * Math.exp(-self.parent.fetch(cache,d,i).y*(d-lastDate)/DAYMS/365.0) ;
-      lastDate = d;
-    }
-    return res;
-  });
-  return cache[this.ID][i];
-};
+  var dcf = this.parent.daycount(pyfy.util.dateParts(last),pyfy.util.dateParts(d));
+
+  return query.fetch(this,last) * Math.exp(-query.fetch(this.parent,d)*dcf);
+};  
+

@@ -1,3 +1,5 @@
+/*global pyfy,Derived*/
+
 pyfy.Neg = Neg;
 
 function Neg(d) {
@@ -6,6 +8,6 @@ function Neg(d) {
 
 Neg.prototype = new Derived();
 
-Neg.prototype.fn = function(cache,d,i) {
-  return -this.parent.fetch(cache,d,i).y ;
+Neg.prototype.fn = function(query,d) {
+  return -query.fetch(this.parent,d);
 };
