@@ -8,13 +8,13 @@ var suite = vows.describe("last");
 
 suite.addBatch({
   "no data" : {
-    topic : pyfy.base().last(),
+    topic : pyfy.base().prev(),
     "returns empty array" : function(_) {
       assert.deepEqual(_.y(),[]);
     }
   },
   "with data" : {
-    topic : parent.last(),
+    topic : parent.prev(),
      "has derived as prototype" : function(_) {
       assert.isTrue(pyfy.Derived.prototype.isPrototypeOf(_));
     },
