@@ -1,3 +1,4 @@
+/*global pyfy*/
 pyfy.util = {};
 
 pyfy.util.DAYMS = 1000*60*60*24;
@@ -23,7 +24,7 @@ pyfy.util.today = function() {
 pyfy.util.nextDay = function(d,i) {
   if (i === undefined) i=0;
   return new Date(d.getFullYear(),d.getMonth(),d.getDate()+i);
-}
+};
 
 
 function ascending(a,b) { return +a-b;}

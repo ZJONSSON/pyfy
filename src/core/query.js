@@ -1,4 +1,4 @@
-/*global pyfy*/
+/*global pyfy,ascending*/
 pyfy.query = function(id,query) {
   query = query || new Query();
   query.cache[id] = query.cache[id] || {values:{}};
@@ -13,13 +13,13 @@ function Query() {
 
 Query.prototype.getCache = function(obj) {
   return (this.cache[obj.ID]) || (this.cache[obj.ID] = {values : {}});
-}
+};
 
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
   if (!cache.dates) {
    cache.dates = obj.dates()
-    .map(function(d) { return d.valueOf()})
+    .map(function(d) { return d.valueOf(); })
     .sort(ascending);
   }
   return cache.dates;
@@ -30,7 +30,7 @@ Query.prototype.y = function(obj,dates) {
 };
 
 Query.prototype.x = function(obj) {
-  return this.dates(obj).map(function(d) { return new Date(d)});
+  return this.dates(obj).map(function(d) { return new Date(d); });
 };
 
 Query.prototype.val = function(id) {

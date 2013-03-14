@@ -14,9 +14,9 @@ pyfy.Base = Base;
 
 Base.prototype.dates = function() {
   var rawDates = this.rawDates();
-  dates = [];
+  var dates = [];
   for (var date in rawDates) {
-    dates.push(+rawDates[date])
+    dates.push(new Date(+rawDates[date]));
   }
   return dates.sort(ascending);
 };
@@ -61,9 +61,8 @@ Base.prototype.pv= function(curve) {
   return pv;
 };
 
-Base.prototype.y = function(dates,res) {
-  var query = pyfy.query();
-  return query.get(this,dates);
+Base.prototype.y = function(dates) {
+  return pyfy.query().get(this,dates);
 };
 
 Base.prototype.x = function(dates) {
