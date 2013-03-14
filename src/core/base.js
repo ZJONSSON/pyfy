@@ -1,4 +1,4 @@
-/*global pyfy,Cumul,Diff,Last,Max,Min,Neg,Derived,Res,Period,Dcf,Calendar,ascending*/
+/*global pyfy,Cumul,Diff,Prev,Max,Min,Neg,Derived,Res,Period,Dcf,Calendar,ascending*/
 
 var ID=0;
 
@@ -81,7 +81,7 @@ Base.prototype.fn = function() {
 };
 
 // Allow derived object by chaining
-[Cumul,Diff,Last,Max,Min,Neg,Calendar,Dcf,Period,Derived].forEach(function(Fn) {
+[Cumul,Diff,Prev,Max,Min,Neg,Calendar,Dcf,Period,Derived].forEach(function(Fn) {
   Base.prototype[Fn.name.toLowerCase()] = function(a,b,c) {
     return new Fn(this,a,b,c);
   };

@@ -23,7 +23,7 @@ all: \
 	src/core/data/interval.js \
 	src/core/derived.js \
 	src/core/deriv/period.js \
-	src/core/deriv/last.js \
+	src/core/deriv/prev.js \
 	src/core/deriv/cumul.js \
 	src/core/deriv/diff.js \
 	src/core/deriv/max.js \

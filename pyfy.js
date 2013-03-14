@@ -155,7 +155,7 @@
   Base.prototype.fn = function() {
     return 0;
   };
-  [ Cumul, Diff, Last, Max, Min, Neg, Calendar, Dcf, Period, Derived ].forEach(function(Fn) {
+  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
     };
@@ -333,13 +333,13 @@
   Period.prototype.fn = function(res, d) {
     return d >= this.start && d <= this.fin ? res.fetch(this.parent, d) : 0;
   };
-  pyfy.Last = Last;
-  function Last(d, start) {
+  pyfy.Prev = Prev;
+  function Prev(d, start) {
     Derived.call(this, d);
     this.default = start || 0;
   }
-  Last.prototype = new Derived();
-  Last.prototype.fn = function(res, d) {
+  Prev.prototype = new Derived();
+  Prev.prototype.fn = function(res, d) {
     var dates = this.dates(res), datePos = res.cache[this.ID].datePos[d];
     return datePos > 0 ? res.fetch(this.parent, dates[datePos - 1]) : this.default;
   };

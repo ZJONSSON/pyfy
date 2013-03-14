@@ -14,10 +14,11 @@ hff = function(issue,maturity,interest,ocpi) {
       annuity = (interest/2) / (1-(1/Math.pow((1+interest/2),periods))), 
   per = pyfy.interval(issue,6,periods)
   hff = per.mul(annuity)
-  hff.bal = pyfy.stock({x:issue,y:1}).sub(0)
-  hff.i = per.mul(hff.bal.last()).mul(interest/2)
-  hff.p = hff.sub(hff.i)
-  hff.bal.other = hff.p.cumul()
+  hff.bal = pyfy.acct(1);
+  hff.prev = hff.bal.prev();
+  hff.i = per.mul(hff.prev).mul(interest/2)
+  hff.p = hff.sub(hff.i).neg();
+  hff.bal.setParent(hff.p)
   return hff;
 }
 
