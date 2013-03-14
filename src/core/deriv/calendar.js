@@ -9,14 +9,14 @@ function Calendar(d,calendar) {
 
 Calendar.prototype = new Derived();
 
-Calendar.prototype.rawDates = function(res) {
-  res = pyfy.res(this.ID,res);
-  var cache = res.cache[this.ID];
+Calendar.prototype.rawDates = function(query) {
+  query = pyfy.query(this.ID,query);
+  var cache = query.cache[this.ID];
 
   cache.dateMap = {};
   cache.rawDates = {};
 
-  for (var pd in this.parent.rawDates(res)) {
+  for (var pd in this.parent.rawDates(query)) {
     var d = this.calendar(new Date(+pd)).valueOf();
     cache.rawDates[d] = +d;
     cache.dateMap[d] = +pd;
@@ -25,9 +25,9 @@ Calendar.prototype.rawDates = function(res) {
   return cache.rawDates;
 };
 
-Calendar.prototype.fn = function(res,d) {
-  var cache = res.cache[this.ID];
-  return res.fetch(this.parent,cache.dateMap[d] || this.calendar(d));
+Calendar.prototype.fn = function(query,d) {
+  var cache = query.cache[this.ID];
+  return query.fetch(this.parent,cache.dateMap[d] || this.calendar(d));
 };
 
 Calendar.prototype.calendar = function(d) {

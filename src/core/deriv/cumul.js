@@ -8,9 +8,9 @@ function Cumul(d) {
 
 Cumul.prototype = new Derived();
 
-Cumul.prototype.fn = function(res,d) {
-  var dates = this.dates(res),
-      datePos = res.cache[this.ID].datePos[d];
+Cumul.prototype.fn = function(query,d) {
+  var dates = this.dates(query),
+      datePos = pyfy.util.bisect(dates,d);
  
-  return res.fetch(this.parent,d) + (datePos ? res.fetch(this,dates[datePos-1]) : 0);
+  return query.fetch(this.parent,d) + (datePos ? query.fetch(this,dates[datePos-1]) : 0);
 };

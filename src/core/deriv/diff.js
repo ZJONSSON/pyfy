@@ -8,9 +8,9 @@ function Diff(d) {
 
 Diff.prototype = new Derived();
 
-Diff.prototype.fn = function(res,d) {
-  var dates = this.dates(res),
-      datePos = res.cache[this.ID].datePos[d];
+Diff.prototype.fn = function(query,d) {
+  var dates = this.dates(query),
+      datePos = pyfy.util.bisect(dates,d);
 
-  return (datePos) ? res.fetch(this.parent,d) - res.fetch(this.parent,dates[datePos-1]) : 0;
+  return (datePos) ? query.fetch(this.parent,d) - query.fetch(this.parent,dates[datePos-1]) : 0;
 };

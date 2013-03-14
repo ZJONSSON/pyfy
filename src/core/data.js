@@ -11,9 +11,9 @@ pyfy.Data = Data;
 
 Data.prototype = new Base();
 
-Data.prototype.rawDates = function(res) {
-  res = pyfy.res(this.ID,res)
-  var cache = res.cache[this.ID];
+Data.prototype.rawDates = function(query) {
+  query = pyfy.query(this.ID,query)
+  var cache = query.cache[this.ID];
 
   if (!cache.rawDates) {
     cache.rawDates = {};
@@ -49,7 +49,7 @@ Data.prototype.set = function(a) {
   return this.update(a);
 };
 
-Data.prototype.fn = function(res,d) {
+Data.prototype.fn = function(query,d) {
   if (!Object.keys(this.data).length) return 0;
   if (this.data[d]) return this.data[d];
 

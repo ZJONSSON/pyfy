@@ -14,10 +14,10 @@ Sum.prototype.inputs = function() {
   return this.parents;
 };
 
-Sum.prototype.fn = function(res,d) {
+Sum.prototype.fn = function(query,d) {
   var sum = 0;
   this.parents.forEach(function(parent) {
-    sum+=res.fetch(parent,d);
+    sum+=query.fetch(parent,d);
   });
   return sum;
 };

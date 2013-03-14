@@ -30,11 +30,11 @@ Operator.prototype.inputs = function() {
   return [this.left,this.right];
 };
 
-Operator.prototype.fn = function(res,d,i) {
+Operator.prototype.fn = function(query,d,i) {
   var left,right;
-  right = res.fetch(this.right,d);
+  right = query.fetch(this.right,d);
   // We can bypass further evaluation if the right side is zero in a multiplication
   if (!right && this.op =="mul") return 0;
-  left = res.fetch(this.left,d);
+  left = query.fetch(this.left,d);
   return ops[this.op](left,right);
 };

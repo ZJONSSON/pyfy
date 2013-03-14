@@ -33,19 +33,19 @@ function Df(d,val) {
 
 Df.prototype = new Dcf();
 
-Df.prototype.rawDates = function(res) {
-  Base.prototype.rawDates.call(this,res);
+Df.prototype.rawDates = function(query) {
+  Base.prototype.rawDates.call(this,query);
   return {};
 };
 
-Df.prototype.fn = function(res,d) {
-  var dates = this.dates(res);
+Df.prototype.fn = function(query,d) {
+  var dates = this.dates(query);
   var pos = pyfy.util.bisect(dates,d);
   var last =dates[pos-1];
   if (!last) return d==dates[pos] ? 1 : 0;
 
   var dcf = this.parent.daycount(pyfy.util.dateParts(last),pyfy.util.dateParts(d));
 
-  return res.fetch(this,last) * Math.exp(-res.fetch(this.parent,d)*dcf);
+  return query.fetch(this,last) * Math.exp(-query.fetch(this.parent,d)*dcf);
 };  
 

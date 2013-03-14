@@ -8,6 +8,6 @@ function Neg(d) {
 
 Neg.prototype = new Derived();
 
-Neg.prototype.fn = function(res,d) {
-  return -res.fetch(this.parent,d);
+Neg.prototype.fn = function(query,d) {
+  return -query.fetch(this.parent,d);
 };

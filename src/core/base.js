@@ -12,12 +12,12 @@ pyfy.base = function() {
 
 pyfy.Base = Base;
 
-Base.prototype.dates = function(res) {
-  res = res || new Res(this.ID);
-  var cache = res.cache[this.ID] = res.cache[this.ID] || {values:{}};
+Base.prototype.dates = function(query) {
+  query = pyfy.query(query);
+  var cache = query.cache[this.ID] = query.cache[this.ID] || {values:{}};
 
   if (!cache.dates) {
-    var rawDates = this.rawDates(res);
+    var rawDates = this.rawDates(query);
     cache.dates = [];
     cache.datePos = {};
 
@@ -33,9 +33,9 @@ Base.prototype.dates = function(res) {
   return cache.dates;
 };
 
-Base.prototype.rawDates = function(res) {
-  res = pyfy.res(this.ID,res);
-  var cache = res.cache[this.ID];
+Base.prototype.rawDates = function(query) {
+  query = pyfy.query(this.ID,query);
+  var cache = query.cache[this.ID];
 
   if (!cache.rawDates) {
     cache.rawDates = {};
@@ -44,7 +44,7 @@ Base.prototype.rawDates = function(res) {
     [].concat(inputs)
       .filter(function(d) { return d && d.rawDates; })
       .forEach(function(input) {
-        for (var d in input.rawDates(res)) {
+        for (var d in input.rawDates(query)) {
           cache.rawDates[d] = +d;
         }
       });
@@ -54,9 +54,9 @@ Base.prototype.rawDates = function(res) {
 
 
 Base.prototype.exec = function(d) {
-  var res = pyfy.res(this.ID);
+  var query = pyfy.query(this.ID);
 
-  res.dates = this.dates(res);
+  query.dates = this.dates(query);
 
   if (d) {
     d = [].concat(d)
@@ -64,16 +64,16 @@ Base.prototype.exec = function(d) {
         return d.valueOf();
       });
 
-    res.dates = res.dates
+    query.dates = query.dates
       .concat(d)
       .sort(ascending);
   }
 
-  res.dates.forEach(function(d) {
-    res.fetch(this,d);
+  query.dates.forEach(function(d) {
+    query.fetch(this,d);
   },this);
 
-  return res;
+  return query;
 };
 
 Base.prototype.fn = function() {

@@ -4,15 +4,15 @@ pyfy.util.DAYMS = 1000*60*60*24;
 
 pyfy.util.dateParts = function(d) {
   d = new Date(d);
-  var res =  {
+  var query =  {
     y : d.getFullYear(),
     m : d.getMonth(),
     d : d.getDate()
   };
-  res.date = new Date(res.y,res.m,res.d);
-  res.lastofMonth = (new Date(res.y,res.m,res.d+1)).getMonth() == res.m + 1;
-  res.lastFeb = (res.m == 2 && res.lastofMonth);
-  return res;
+  query.date = new Date(query.y,query.m,query.d);
+  query.lastofMonth = (new Date(query.y,query.m,query.d+1)).getMonth() == query.m + 1;
+  query.lastFeb = (query.m == 2 && query.lastofMonth);
+  return query;
 };
 
 

@@ -8,8 +8,8 @@ function Dcf(parent,daycount) {
 
 Dcf.prototype = new Derived();
 
-Dcf.prototype.fn = function(res) {
-  var cache = res.cache[this.ID];
+Dcf.prototype.fn = function(query) {
+  var cache = query.cache[this.ID];
   if (Object.keys(cache.values).length) return 0;
   var dates = this.dates();
   cache.values = {};

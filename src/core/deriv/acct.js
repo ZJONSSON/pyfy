@@ -14,11 +14,11 @@ function Acct(d) {
 Acct.prototype = new Derived();
 
 
-Acct.prototype.fn = function(res,d) {
-  var dates = this.parent.dates(res), fs
+Acct.prototype.fn = function(query,d) {
+  var dates = this.parent.dates(query), fs
       pos = pyfy.util.bisect(dates,d);
       
   if (pos<1) return this.start;
-  if (dates[pos] == d) return res.fetch(this,dates[pos-1]) + res.fetch(this.parent,d);
-  return res.fetch(this,dates[pos-1]);
+  if (dates[pos] == d) return query.fetch(this,dates[pos-1]) + query.fetch(this.parent,d);
+  return query.fetch(this,dates[pos-1]);
 };

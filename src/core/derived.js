@@ -14,12 +14,9 @@ Derived.prototype.inputs = function() {
   return this.parent;
 };
 
-Derived.prototype.rawDates = function(res) {
-  return this.parent.rawDates(res);
-}
 
-Derived.prototype.fn= function(res,d) {
-  return res.fetch(this.parent,d);
+Derived.prototype.fn= function(query,d) {
+  return query.fetch(this.parent,d);
 };
 
 Derived.prototype.setParent = function(d) {
