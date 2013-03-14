@@ -76,11 +76,12 @@
       return new Date(d);
     });
   };
-  Query.prototype.val = function(id) {
-    if (typeof id === "object") id = id.ID;
-    return this.y(id).map(function(d, i) {
+  Query.prototype.val = function(obj, dates) {
+    dates = dates || this.dates(obj);
+    dates = [].concat(dates);
+    return this.get(obj, dates).map(function(d, i) {
       return {
-        x: new Date(this.dates[i]),
+        x: new Date(dates[i]),
         y: d
       };
     }, this);
@@ -152,11 +153,10 @@
     return pyfy.query().get(this, dates);
   };
   Base.prototype.x = function(dates) {
-    var query = pyfy.query();
-    return query.y(this, dates);
+    return pyfy.query().y(this, dates);
   };
   Base.prototype.val = function(dates) {
-    return this.exec(dates).val(this.ID);
+    return pyfy.query().val(this, dates);
   };
   function Const(d) {
     this.const = d || 0;

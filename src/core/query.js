@@ -33,10 +33,11 @@ Query.prototype.x = function(obj) {
   return this.dates(obj).map(function(d) { return new Date(d); });
 };
 
-Query.prototype.val = function(id) {
-  if (typeof id === "object") id = id.ID;
-  return this.y(id).map(function(d,i) {
-    return {x:new Date(this.dates[i]),y:d};
+Query.prototype.val = function(obj,dates) {
+  dates = dates || this.dates(obj);
+  dates = [].concat(dates);
+   return this.get(obj,dates).map(function(d,i) {
+    return {x:new Date(dates[i]),y:d};
   },this);
 };
 
