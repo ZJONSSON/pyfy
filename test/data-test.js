@@ -30,7 +30,7 @@ suite.addBatch({
     },
     "dates match inputs" : function(_) {
       var expected = testData.a.map(function(d) { return d.x; }).sort();
-      assert.deepEqual(_.x(),expected);
+      assert.deepEqual(_.dates(),expected.map(function(d) { return d.valueOf()}));
     }
   }
 });

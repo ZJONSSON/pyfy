@@ -11,15 +11,20 @@ function Query() {
   this.cache = {};
 }
 
+Query.prototype.getCache = function(obj) {
+  return (this.cache[obj.ID]) || (this.cache[obj.ID] = {});
+}
+
 Query.prototype.register = function(id) {
   if (!this.cache[id]) this.cache[id] = {};
 };
 
 Query.prototype.dates = function(obj) {
-  var cache = this.cache[this.ID];
+  var cache = this.getCache(obj);
   if (!cache.dates) {
+    var rawDates = obj.rawDates(this);
     cache.dates = [];
-    for (var date in obj.rawDates(this)) {
+    for (var date in rawDates) {
       cache.dates.push(+rawDates[date])
     }
     cache.dates.sort(ascending);
@@ -27,18 +32,12 @@ Query.prototype.dates = function(obj) {
   return cache.dates;
 };
 
-Query.prototype.y = function(id) {
-  if (typeof id === "object") id = id.ID;
-  return this.dates.map(function(d) {
-    return this.cache[id].values[d];
-  },this);
+Query.prototype.y = function(obj,dates) {
+  return this.get(obj,dates);
 };
 
-Query.prototype.x = function() {
-  if (typeof id === "object") id = id.ID;
-  return this.dates.map(function(d) {
-    return new Date(d);
-  });
+Query.prototype.x = function(obj) {
+  return this.dates(obj).map(function(d) { return new Date(d)});
 };
 
 Query.prototype.val = function(id) {
@@ -51,7 +50,7 @@ Query.prototype.val = function(id) {
 Query.prototype.get = function(obj,d) {
   if (!d) d = obj.dates();
   return [].concat(d).map(function(d) {
-    return this.fetch(obj,d);
+    return this.fetch(obj,d.valueOf());
   },this);
 };
 
@@ -62,7 +61,7 @@ Query.prototype.fetch = function(obj,d) {
   var values = this.cache[obj.ID].values;
 
   if (values[d] === undefined) {
-    var fn = obj.fn(this,d);
+    var fn = obj.fn(this,d.valueOf());
     if (fn !== undefined) values[d] = fn;
   }
   return values[d];

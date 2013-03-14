@@ -9,7 +9,7 @@ function Cumul(d) {
 Cumul.prototype = new Derived();
 
 Cumul.prototype.fn = function(query,d) {
-  var dates = this.dates(query),
+  var dates = query.dates(this),
       datePos = pyfy.util.bisect(dates,d);
  
   return query.fetch(this.parent,d) + (datePos ? query.fetch(this,dates[datePos-1]) : 0);

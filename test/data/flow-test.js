@@ -24,7 +24,7 @@ suite.addBatch({
       assert.deepEqual(_.y(),[100,120,-10]);
     },
     "returns zeros for dates with no data" : function(_) {
-      assert.deepEqual(_.y(testData.dates),[0, 0, 100, 0,  120, -10, 0]);
+      assert.deepEqual(_.y(testData.getDates("a")),[0, 0, 100, 0,  120, -10, 0]);
     }
   }
 });

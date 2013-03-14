@@ -15,7 +15,7 @@ suite.addBatch({
       assert.deepEqual(_.y(),[100,120,-10]);
     },
     "returns last value with extrapolation" : function(_) {
-      assert.deepEqual(_.y(testData.dates),[100,100,100,107.86329535982217,120,-10,-10]);
+      assert.deepEqual(_.y(testData.getDates("a")),[100,100,100,107.86329535982217,120,-10,-10]);
     }
   }
 });

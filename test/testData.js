@@ -18,6 +18,17 @@ var testData =  {
   ]
 };
 
+testData.getDates = function() {
+  var dates = [];
+  keys = Array.prototype.slice.call(arguments);
+  keys.forEach(function(key) {
+    testData[key].forEach(function(d) {
+      dates.push(d.x)
+    })
+  })
+  return dates.concat(testData.dates).sort(function(a,b) { return a-b})
+}
+
 testData.dataDates = testData.a.map(function(d) { return d.x})
   .slice(1)
   .concat(testData.b.map(function(d) { 

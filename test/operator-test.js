@@ -12,12 +12,7 @@ var suite = vows.describe("operator");
 suite.addBatch({
   "intrinsic dates" : function() {
     [fa.add(fb),sa.add(sb)].forEach(function(_) {
-      assert.deepEqual(_.x(),testData.dataDates);
-    });
-  },
-  "supplied dates" : function() {
-    [fa.add(fb),sa.add(sb)].forEach(function(_) {
-      assert.deepEqual(_.x(testData.dates),testData.allDates);
+      assert.deepEqual(_.dates(),testData.dataDates.map(function(d) { return d.valueOf()}));
     });
   },
   "add" : function() {

@@ -54,18 +54,29 @@
     this.rawDates = {};
     this.cache = {};
   }
+  Query.prototype.getCache = function(obj) {
+    return this.cache[obj.ID] || (this.cache[obj.ID] = {});
+  };
   Query.prototype.register = function(id) {
     if (!this.cache[id]) this.cache[id] = {};
   };
-  Query.prototype.y = function(id) {
-    if (typeof id === "object") id = id.ID;
-    return this.dates.map(function(d) {
-      return this.cache[id].values[d];
-    }, this);
+  Query.prototype.dates = function(obj) {
+    var cache = this.getCache(obj);
+    if (!cache.dates) {
+      var rawDates = obj.rawDates(this);
+      cache.dates = [];
+      for (var date in rawDates) {
+        cache.dates.push(+rawDates[date]);
+      }
+      cache.dates.sort(ascending);
+    }
+    return cache.dates;
   };
-  Query.prototype.x = function() {
-    if (typeof id === "object") id = id.ID;
-    return this.dates.map(function(d) {
+  Query.prototype.y = function(obj, dates) {
+    return this.get(obj, dates);
+  };
+  Query.prototype.x = function(obj) {
+    return this.dates(obj).map(function(d) {
       return new Date(d);
     });
   };
@@ -81,7 +92,7 @@
   Query.prototype.get = function(obj, d) {
     if (!d) d = obj.dates();
     return [].concat(d).map(function(d) {
-      return this.fetch(obj, d);
+      return this.fetch(obj, d.valueOf());
     }, this);
   };
   Query.prototype.fetch = function(obj, d) {
@@ -91,7 +102,7 @@
     };
     var values = this.cache[obj.ID].values;
     if (values[d] === undefined) {
-      var fn = obj.fn(this, d);
+      var fn = obj.fn(this, d.valueOf());
       if (fn !== undefined) values[d] = fn;
     }
     return values[d];
@@ -138,20 +149,6 @@
     }
     return cache.rawDates;
   };
-  Base.prototype.exec = function(d) {
-    var query = pyfy.query(this.ID);
-    query.dates = this.dates(query);
-    if (d) {
-      d = [].concat(d).map(function(d) {
-        return d.valueOf();
-      });
-      query.dates = query.dates.concat(d).sort(ascending);
-    }
-    query.dates.forEach(function(d) {
-      query.fetch(this, d);
-    }, this);
-    return query;
-  };
   Base.prototype.fn = function() {
     return 0;
   };
@@ -168,11 +165,13 @@
     });
     return pv;
   };
-  Base.prototype.y = function(dates) {
-    return this.exec(dates).y(this.ID);
+  Base.prototype.y = function(dates, res) {
+    var query = pyfy.query();
+    return query.get(this, dates);
   };
   Base.prototype.x = function(dates) {
-    return this.exec(dates).x(this.ID);
+    var query = pyfy.query();
+    return dates.y(this, dates);
   };
   Base.prototype.val = function(dates) {
     return this.exec(dates).val(this.ID);
@@ -346,7 +345,7 @@
   }
   Cumul.prototype = new Derived();
   Cumul.prototype.fn = function(query, d) {
-    var dates = this.dates(query), datePos = pyfy.util.bisect(dates, d);
+    var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return query.fetch(this.parent, d) + (datePos ? query.fetch(this, dates[datePos - 1]) : 0);
   };
   pyfy.Diff = Diff;

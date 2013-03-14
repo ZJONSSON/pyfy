@@ -56,20 +56,20 @@ Base.prototype.rawDates = function(query) {
 Base.prototype.exec = function(d) {
   var query = pyfy.query(this.ID);
 
-  query.dates = this.dates(query);
+  var dates = this.dates(query);
 
   if (d) {
-    d = [].concat(d)
+    d = this.dates().concat(d)
       .map(function(d) {
         return d.valueOf();
       });
 
-    query.dates = query.dates
+    dates = dates
       .concat(d)
       .sort(ascending);
   }
 
-  query.dates.forEach(function(d) {
+  dates.forEach(function(d) {
     query.fetch(this,d);
   },this);
 
@@ -97,12 +97,14 @@ Base.prototype.pv= function(curve) {
   return pv;
 };
 
-Base.prototype.y = function(dates) {
-  return this.exec(dates).y(this.ID);
+Base.prototype.y = function(dates,res) {
+  var query = pyfy.query();
+  return query.get(this,dates);
 };
 
 Base.prototype.x = function(dates) {
-  return this.exec(dates).x(this.ID);
+  var query = pyfy.query();
+  return dates.y(this,dates);
 };
 
 Base.prototype.val = function(dates) {
