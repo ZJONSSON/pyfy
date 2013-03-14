@@ -10,7 +10,7 @@ function Prev(d,start) {
 Prev.prototype = new Derived();
 
 Prev.prototype.fn = function(query,d) {
-  var dates = this.dates(query),
+  var dates = query.dates(this),
       datePos = pyfy.util.bisect(dates,d);
   return (datePos > 0) ? query.fetch(this.parent,dates[datePos-1]) : this.default;  
 };

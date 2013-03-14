@@ -39,7 +39,7 @@ Df.prototype.rawDates = function(query) {
 };
 
 Df.prototype.fn = function(query,d) {
-  var dates = this.dates(query);
+  var dates = query.dates(this);
   var pos = pyfy.util.bisect(dates,d);
   var last =dates[pos-1];
   if (!last) return d==dates[pos] ? 1 : 0;

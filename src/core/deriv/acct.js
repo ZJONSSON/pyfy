@@ -15,7 +15,7 @@ Acct.prototype = new Derived();
 
 
 Acct.prototype.fn = function(query,d) {
-  var dates = this.parent.dates(query), fs
+  var dates = query.dates(this.parent),
       pos = pyfy.util.bisect(dates,d);
       
   if (pos<1) return this.start;

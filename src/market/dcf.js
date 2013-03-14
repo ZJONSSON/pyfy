@@ -11,7 +11,7 @@ Dcf.prototype = new Derived();
 Dcf.prototype.fn = function(query) {
   var cache = query.cache[this.ID];
   if (Object.keys(cache.values).length) return 0;
-  var dates = this.dates();
+  var dates = query.dates(this);
   cache.values = {};
 
   dates.slice(1).forEach(function(d,i) {

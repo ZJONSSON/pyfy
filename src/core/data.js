@@ -53,7 +53,7 @@ Data.prototype.fn = function(query,d) {
   if (!Object.keys(this.data).length) return 0;
   if (this.data[d]) return this.data[d];
 
-  var dates = this.dates(),
+  var dates = query.dates(this),
       next = pyfy.util.bisect(dates,d),
       prev = next -1;
 

@@ -12,22 +12,15 @@ function Query() {
 }
 
 Query.prototype.getCache = function(obj) {
-  return (this.cache[obj.ID]) || (this.cache[obj.ID] = {});
+  return (this.cache[obj.ID]) || (this.cache[obj.ID] = {values : {}});
 }
-
-Query.prototype.register = function(id) {
-  if (!this.cache[id]) this.cache[id] = {};
-};
 
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
   if (!cache.dates) {
-    var rawDates = obj.rawDates(this);
-    cache.dates = [];
-    for (var date in rawDates) {
-      cache.dates.push(+rawDates[date])
-    }
-    cache.dates.sort(ascending);
+   cache.dates = obj.dates()
+    .map(function(d) { return d.valueOf()})
+    .sort(ascending);
   }
   return cache.dates;
 };
@@ -48,17 +41,14 @@ Query.prototype.val = function(id) {
 };
 
 Query.prototype.get = function(obj,d) {
-  if (!d) d = obj.dates();
+  if (!d) d = this.dates(obj);
   return [].concat(d).map(function(d) {
     return this.fetch(obj,d.valueOf());
   },this);
 };
 
 Query.prototype.fetch = function(obj,d) {
-  if (!isNaN(obj)) return obj;
-  if (!this.cache[obj.ID]) this.cache[obj.ID] = {values:{}};
-  
-  var values = this.cache[obj.ID].values;
+  var values = this.getCache(obj).values; 
 
   if (values[d] === undefined) {
     var fn = obj.fn(this,d.valueOf());

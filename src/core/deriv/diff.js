@@ -9,7 +9,7 @@ function Diff(d) {
 Diff.prototype = new Derived();
 
 Diff.prototype.fn = function(query,d) {
-  var dates = this.dates(query),
+  var dates = query.dates(this),
       datePos = pyfy.util.bisect(dates,d);
 
   return (datePos) ? query.fetch(this.parent,d) - query.fetch(this.parent,dates[datePos-1]) : 0;

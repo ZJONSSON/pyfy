@@ -12,25 +12,13 @@ pyfy.base = function() {
 
 pyfy.Base = Base;
 
-Base.prototype.dates = function(query) {
-  query = pyfy.query(query);
-  var cache = query.cache[this.ID] = query.cache[this.ID] || {values:{}};
-
-  if (!cache.dates) {
-    var rawDates = this.rawDates(query);
-    cache.dates = [];
-    cache.datePos = {};
-
-    for (var date in rawDates) {
-      cache.dates.push(+rawDates[date]);
-    }
-
-    cache.dates.sort(ascending)
-      .forEach(function(d,i) {
-        cache.datePos[d] = i;
-      });
+Base.prototype.dates = function() {
+  var rawDates = this.rawDates();
+  dates = [];
+  for (var date in rawDates) {
+    dates.push(+rawDates[date])
   }
-  return cache.dates;
+  return dates.sort(ascending);
 };
 
 Base.prototype.rawDates = function(query) {
