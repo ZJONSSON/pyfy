@@ -48,6 +48,7 @@ Query.prototype.get = function(obj,d) {
 };
 
 Query.prototype.fetch = function(obj,d) {
+  if (!isNaN(obj)) return obj;  // in case it's a number
   var values = this.getCache(obj).values; 
 
   if (values[d] === undefined) {

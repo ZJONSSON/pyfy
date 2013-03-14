@@ -92,6 +92,7 @@
     }, this);
   };
   Query.prototype.fetch = function(obj, d) {
+    if (!isNaN(obj)) return obj;
     var values = this.getCache(obj).values;
     if (values[d] === undefined) {
       var fn = obj.fn(this, d.valueOf());
@@ -153,7 +154,7 @@
   };
   Base.prototype.x = function(dates) {
     var query = pyfy.query();
-    return dates.y(this, dates);
+    return query.y(this, dates);
   };
   Base.prototype.val = function(dates) {
     return this.exec(dates).val(this.ID);
