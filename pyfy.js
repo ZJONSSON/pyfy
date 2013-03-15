@@ -62,7 +62,7 @@
   Query.prototype.dates = function(obj) {
     var cache = this.getCache(obj);
     if (!cache.dates) {
-      cache.dates = obj.dates().map(function(d) {
+      cache.dates = obj.dates(this).map(function(d) {
         return d.valueOf();
       }).sort(ascending);
     }
@@ -109,8 +109,8 @@
     return new Base();
   };
   pyfy.Base = Base;
-  Base.prototype.dates = function() {
-    var rawDates = this.rawDates();
+  Base.prototype.dates = function(query) {
+    var rawDates = this.rawDates(query);
     var dates = [];
     for (var date in rawDates) {
       dates.push(new Date(+rawDates[date]));
@@ -153,7 +153,7 @@
     return pyfy.query().get(this, dates);
   };
   Base.prototype.x = function(dates) {
-    return pyfy.query().x(this, dates);
+    return pyfy.query().y(this, dates);
   };
   Base.prototype.val = function(dates) {
     return pyfy.query().val(this, dates);
@@ -523,10 +523,6 @@
     this.val = val;
   }
   Df.prototype = new Dcf();
-  Df.prototype.rawDates = function(query) {
-    Base.prototype.rawDates.call(this, query);
-    return {};
-  };
   Df.prototype.fn = function(query, d) {
     var dates = query.dates(this);
     var pos = pyfy.util.bisect(dates, d);
@@ -631,5 +627,70 @@
     var s = this.s, self = this, dates = cache.__dates__;
     var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
     return s * Math.exp(e);
+  };
+  pyfy.wiener = function(s, vol, r) {
+    return new Wiener(s, vol, r);
+  };
+  function rndNorm() {
+    return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
+  }
+  function Wiener() {
+    Base.apply(this);
+    this.change = this.diff(this);
+  }
+  Wiener.prototype = new Base();
+  Wiener.prototype.rawDates = function(query) {
+    var res = {};
+    if (query && query.cache[this.ID].dates) {
+      query.cache[this.ID].dates.forEach(function(d) {
+        res[d] = d;
+      });
+    }
+    return res;
+  };
+  Wiener.prototype.fn = function(query, d) {
+    var cache = query.cache[this.ID], val;
+    if (!cache.dates) {
+      cache.dates = [ d ];
+      cache.first = {
+        x: d,
+        y: 0
+      };
+      cache.last = {
+        x: d,
+        y: 0
+      };
+      return 0;
+    }
+    if (d > cache.last.x) {
+      cache.dates.push(d);
+      val = cache.last.y + rndNorm() * (d - cache.last.x) / pyfy.util.DAYMS / 365.25;
+      cache.last = {
+        x: d,
+        y: val
+      };
+      return val;
+    }
+    if (d < cache.first.x) {
+      cache.dates.slice(0, 0, d);
+      val = cache.min.y - rndNorm() * (cache.first.x - d) / pyfy.util.DAYMS / 365.25;
+      cache.first = {
+        x: d,
+        y: val
+      };
+      return val;
+    }
+    var datePos = pyfy.util.bisect(cache.dates, d), prev = {
+      x: cache.dates[datePos - 1]
+    }, next = {
+      x: cache.dates[datePos]
+    };
+    prev.y = query.fetch(this, prev.x);
+    next.y = query.fetch(this, next.x);
+    cache.dates.splice(datePos, 0, d);
+    return prev.y + (d - prev.x) / (next.x - prev.x) * (next.y - prev.y);
+  };
+  Wiener.prototype.dates = function(query) {
+    return query ? query.cache[this.ID].dates.all : [];
   };
 })();

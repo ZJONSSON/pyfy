@@ -42,6 +42,7 @@ all: \
 	src/market/ir.js \
 	src/stat/ziggurat.js \
 	src/stat/norm.js \
+	src/stat/wiener.js \
 	src/end.js
 
 pyfy.js: Makefile
