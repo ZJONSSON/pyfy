@@ -1,5 +1,5 @@
-/*global pyfy,Base,fetch*/
-pyfy.Operator = Operator;
+/*global pyfy,Base*/
+pyfy.operator = pyfy.Operator = Operator;
 
 var ops = {
   add:function(a,b) { return a+b; },
@@ -16,13 +16,14 @@ Object.keys(ops).forEach(function(op) {
 });
 
 function Operator(op,left,right) {
+  if (!(this instanceof Operator))
+    return new Operator(op,left,right);
+
   Base.apply(this,arguments);
   this.left = left;
   this.right = right;
   this.op = op;
 }
-
-pyfy.Operator = Operator;
 
 Operator.prototype = new Base();
 
@@ -30,7 +31,7 @@ Operator.prototype.inputs = function() {
   return [this.left,this.right];
 };
 
-Operator.prototype.fn = function(query,d,i) {
+Operator.prototype.fn = function(query,d) {
   var left,right;
   right = query.fetch(this.right,d);
   // We can bypass further evaluation if the right side is zero in a multiplication

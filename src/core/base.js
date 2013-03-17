@@ -1,16 +1,14 @@
-/*global pyfy,Cumul,Diff,Prev,Max,Min,Neg,Derived,Res,Period,Dcf,Calendar,ascending*/
+/*global pyfy,Cumul,Diff,Prev,Max,Min,Neg,Derived,Period,Dcf,Calendar,ascending*/
 
 var ID=0;
 
+pyfy.base = pyfy.Base = Base;
+
 function Base() {
+  if (!(this instanceof Base))
+    return new Base();
   this.ID = ID++;
 }
-
-pyfy.base = function() {
-  return new Base();
-};
-
-pyfy.Base = Base;
 
 Base.prototype.dates = function(query) {
   var rawDates = this.rawDates(query);

@@ -1,13 +1,12 @@
 /*global pyfy,Base*/
 
-function Const(d) {
-  this.const = d || 0;
-}
+pyfy.const = Const;
 
-pyfy.const = pyfy.c = function(d) {
-  Base.apply(this,arguments);
-  return new Const(d);
-};
+function Const(data,options) {
+  if (!(this instanceof Const))
+    return new Const(data,options);
+  this.const = data || 0;
+}
 
 Const.prototype = new Base();
 

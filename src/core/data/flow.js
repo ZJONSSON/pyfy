@@ -1,11 +1,9 @@
 /*global pyfy,Data*/
-pyfy.flow = function(d) {
-  return new Flow(d);
-};
+pyfy.flow = Flow;
 
-pyfy.Flow = Flow;
-
-function Flow() {
+function Flow(data,options) {
+  if (!(this instanceof Flow))
+    return new Flow(data,options);
  Data.apply(this,arguments);
 }
 

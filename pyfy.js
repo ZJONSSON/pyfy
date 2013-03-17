@@ -42,16 +42,19 @@
     }
     return lo;
   };
+  pyfy.Query = Query;
   pyfy.query = function(id, query) {
     query = query || new Query();
-    query.cache[id] = query.cache[id] || {
-      values: {}
-    };
-    query.cache[id].values = query.cache[id].values || {};
+    if (id) {
+      query.cache[id] = query.cache[id] || {
+        values: {}
+      };
+      query.cache[id].values = query.cache[id].values || {};
+    }
     return query;
   };
   function Query() {
-    this.rawDates = {};
+    if (!(this instanceof Query)) return new Query();
     this.cache = {};
   }
   Query.prototype.getCache = function(obj) {
@@ -102,13 +105,11 @@
     return values[d];
   };
   var ID = 0;
+  pyfy.base = pyfy.Base = Base;
   function Base() {
+    if (!(this instanceof Base)) return new Base();
     this.ID = ID++;
   }
-  pyfy.base = function() {
-    return new Base();
-  };
-  pyfy.Base = Base;
   Base.prototype.dates = function(query) {
     var rawDates = this.rawDates(query);
     var dates = [];
@@ -158,13 +159,11 @@
   Base.prototype.val = function(dates) {
     return pyfy.query().val(this, dates);
   };
-  function Const(d) {
-    this.const = d || 0;
+  pyfy.const = Const;
+  function Const(data, options) {
+    if (!(this instanceof Const)) return new Const(data, options);
+    this.const = data || 0;
   }
-  pyfy.const = pyfy.c = function(d) {
-    Base.apply(this, arguments);
-    return new Const(d);
-  };
   Const.prototype = new Base();
   Const.prototype.fn = function() {
     return this.const;
@@ -173,10 +172,9 @@
     this.const = d;
     return this;
   };
-  pyfy.sum = function(d) {
-    return new Sum(d);
-  };
+  pyfy.sum = Sum;
   function Sum(d) {
+    if (!(this instanceof Sum)) return new Sum(d);
     this.parents = d;
   }
   Sum.prototype = new Base();
@@ -190,13 +188,14 @@
     });
     return sum;
   };
-  function Data(d) {
+  pyfy.data = pyfy.Data = Data;
+  function Data(data, options) {
+    if (!(this instanceof Data)) return new Data(data, options);
     Base.apply(this, arguments);
     this.data = {};
     this._dates = [];
-    if (d) this.update(d);
+    if (data) this.update(data);
   }
-  pyfy.Data = Data;
   Data.prototype = new Base();
   Data.prototype.rawDates = function(query) {
     query = pyfy.query(this.ID, query);
@@ -239,33 +238,27 @@
   Data.prototype._fn = function(d, prev, next) {
     return undefined;
   };
-  pyfy.flow = function(d) {
-    return new Flow(d);
-  };
-  pyfy.Flow = Flow;
-  function Flow() {
+  pyfy.flow = Flow;
+  function Flow(data, options) {
+    if (!(this instanceof Flow)) return new Flow(data, options);
     Data.apply(this, arguments);
   }
   Flow.prototype = new Data();
   Flow.prototype.fn = function(query, d) {
     return this.data[d] || 0;
   };
-  function Stock() {
+  pyfy.stock = Stock;
+  function Stock(data, options) {
+    if (!(this instanceof Stock)) return new Stock(data, options);
     Data.apply(this, arguments);
   }
-  pyfy.Stock = Stock;
-  pyfy.stock = function(d) {
-    return new Stock(d);
-  };
   Stock.prototype = new Data();
   Stock.prototype._fn = function(d, last) {
     return this.data[last];
   };
-  pyfy.Price = Price;
-  pyfy.price = function(d) {
-    return new Price(d);
-  };
-  function Price() {
+  pyfy.price = Price;
+  function Price(data, options) {
+    if (!(this instanceof Price)) return new Price(data, options);
     Data.apply(this, arguments);
   }
   Price.prototype = new Data();
@@ -284,8 +277,9 @@
     }
     return pyfy.flow(interval);
   };
-  pyfy.Derived = Derived;
+  pyfy.derived = pyfy.Derived = Derived;
   function Derived(d, fn) {
+    if (!(this instanceof Derived)) return new Derived(d, fn);
     Base.call(this, arguments);
     this.parent = d || new Base();
     if (fn) this.fn = fn;
@@ -301,8 +295,9 @@
     this.parent = d;
     return this;
   };
-  pyfy.Period = Period;
+  pyfy.period = Period;
   function Period(d, start, fin) {
+    if (!(this instanceof Period)) return new Period(d, start, fin);
     Derived.call(this, d);
     this.start = start || -Infinity;
     this.fin = fin || Infinity;
@@ -311,8 +306,9 @@
   Period.prototype.fn = function(query, d) {
     return d >= this.start && d <= this.fin ? query.fetch(this.parent, d) : 0;
   };
-  pyfy.Prev = Prev;
+  pyfy.prev = Prev;
   function Prev(d, start) {
+    if (!(this instanceof Prev)) return new Prev(d, start);
     Derived.call(this, d);
     this.default = start || 0;
   }
@@ -321,8 +317,9 @@
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return datePos > 0 ? query.fetch(this.parent, dates[datePos - 1]) : this.default;
   };
-  pyfy.Cumul = Cumul;
+  pyfy.cumul = Cumul;
   function Cumul(d) {
+    if (!(this instanceof Cumul)) return new Cumul(d);
     Derived.call(this, d);
   }
   Cumul.prototype = new Derived();
@@ -330,8 +327,9 @@
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return query.fetch(this.parent, d) + (datePos ? query.fetch(this, dates[datePos - 1]) : 0);
   };
-  pyfy.Diff = Diff;
+  pyfy.diff = Diff;
   function Diff(d) {
+    if (!(this instanceof Diff)) return new Diff();
     Derived.call(this, d);
   }
   Diff.prototype = new Derived();
@@ -339,8 +337,9 @@
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return datePos ? query.fetch(this.parent, d) - query.fetch(this.parent, dates[datePos - 1]) : 0;
   };
-  pyfy.Max = Max;
+  pyfy.max = Max;
   function Max(d, max) {
+    if (!(this instanceof Max)) return new Max(d, max);
     Derived.call(this, d);
     this.max = max || 0;
   }
@@ -348,8 +347,9 @@
   Max.prototype.fn = function(query, d) {
     return Math.max(query.fetch(this.parent, d), this.max);
   };
-  pyfy.Min = Min;
+  pyfy.min = Min;
   function Min(d, min) {
+    if (!(this instanceof Min)) return new Min();
     Derived.call(this, d);
     this.min = min || 0;
   }
@@ -359,17 +359,16 @@
   };
   pyfy.Neg = Neg;
   function Neg(d) {
+    if (!(this instanceof Neg)) return new Neg();
     Derived.call(this, d);
   }
   Neg.prototype = new Derived();
   Neg.prototype.fn = function(query, d) {
     return -query.fetch(this.parent, d);
   };
-  pyfy.Acct = Acct;
-  pyfy.acct = function(d) {
-    return new Acct(d);
-  };
+  pyfy.acct = Acct;
   function Acct(d) {
+    if (!(this instanceof Acct)) return new Acct(d);
     Derived.call(this, d);
     this.start = d || 0;
   }
@@ -382,6 +381,7 @@
   };
   pyfy.Calendar = Calendar;
   function Calendar(d, calendar) {
+    if (!(this instanceof Calendar)) return new Calendar();
     Derived.call(this, d);
     if (calendar) this.calendar = calendar;
   }
@@ -406,7 +406,7 @@
     var weekday = d.getDay();
     return weekday === 0 || weekday === 6 ? this.calendar(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) : d;
   };
-  pyfy.Operator = Operator;
+  pyfy.operator = pyfy.Operator = Operator;
   var ops = {
     add: function(a, b) {
       return a + b;
@@ -430,17 +430,17 @@
     };
   });
   function Operator(op, left, right) {
+    if (!(this instanceof Operator)) return new Operator(op, left, right);
     Base.apply(this, arguments);
     this.left = left;
     this.right = right;
     this.op = op;
   }
-  pyfy.Operator = Operator;
   Operator.prototype = new Base();
   Operator.prototype.inputs = function() {
     return [ this.left, this.right ];
   };
-  Operator.prototype.fn = function(query, d, i) {
+  Operator.prototype.fn = function(query, d) {
     var left, right;
     right = query.fetch(this.right, d);
     if (!right && this.op == "mul") return 0;
@@ -478,8 +478,9 @@
     }
     return dct;
   };
-  pyfy.Dcf = Dcf;
+  pyfy.dcf = Dcf;
   function Dcf(parent, daycount) {
+    if (!(this instanceof Dcf)) return new Operator(parent, daycount);
     Derived.call(this, parent);
     if (daycount !== undefined) this.setDaycount(daycount);
   }
@@ -499,10 +500,9 @@
     this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
     return this;
   };
-  pyfy.ir = function(d) {
-    return new Ir(d);
-  };
-  function Ir() {
+  pyfy.ir = Ir;
+  function Ir(data, options) {
+    if (!(this instanceof Ir)) return new Ir(data, options);
     Stock.apply(this, arguments);
     this.df = new Df(this);
     this.daycount = pyfy.daycount.d_30_360;
@@ -607,13 +607,12 @@
   }
   var z = new Ziggurat();
   var rndNorm = pyfy.rndNorm = z.nextGaussian;
-  pyfy.norm = function(s, vol, r) {
-    return new Norm(s, vol, r);
-  };
+  pyfy.norm = Norm;
   function rndNorm() {
     return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
   }
   function Norm(s, r, vol) {
+    if (!(this instanceof Norm)) return new Norm(s, r, vol);
     Base.apply(this);
     this.s = s || 0;
     this.r = r || 0;
@@ -628,13 +627,12 @@
     var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
     return s * Math.exp(e);
   };
-  pyfy.wiener = function(s, vol, r) {
-    return new Wiener(s, vol, r);
-  };
   function rndNorm() {
     return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
   }
+  pyfy.wiener = Wiener;
   function Wiener() {
+    if (!(this instanceof Wiener)) return new Wiener();
     Base.apply(this);
     this.change = this.diff(this);
   }

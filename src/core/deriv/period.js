@@ -1,8 +1,10 @@
 /*global pyfy,Derived*/
 
-pyfy.Period = Period;
+pyfy.period = Period;
 
 function Period(d,start,fin) {
+	if (!(this instanceof Period))
+    return new Period(d,start,fin);
   Derived.call(this,d);
   this.start = start || -Infinity;
   this.fin = fin || Infinity;

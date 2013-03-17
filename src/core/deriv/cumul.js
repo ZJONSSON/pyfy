@@ -1,8 +1,10 @@
 /*global pyfy,Derived*/
 
-pyfy.Cumul = Cumul;
+pyfy.cumul = Cumul;
 
 function Cumul(d) {
+  if (!(this instanceof Cumul))
+    return new Cumul(d);
   Derived.call(this,d);
 }
 

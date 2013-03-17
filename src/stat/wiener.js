@@ -1,14 +1,15 @@
 /*global pyfy,Base*/
 
-pyfy.wiener = function(s,vol,r) {
-  return new Wiener(s,vol,r);
-};
-
 function rndNorm() {
   return (Math.random()*2-1)+(Math.random()*2-1)+(Math.random()*2-1);
 }
 
+pyfy.wiener = Wiener;
+
 function Wiener() {
+  if (!(this instanceof Wiener))
+    return new Wiener();
+
   Base.apply(this);
   this.change= this.diff(this);
 }

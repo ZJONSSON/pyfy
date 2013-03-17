@@ -1,10 +1,11 @@
 /*global pyfy,Base,Stock,Derived,Dcf*/
 
-pyfy.ir = function(d) {
-  return new Ir(d);
-};
+pyfy.ir = Ir;
 
-function Ir() {
+function Ir(data,options) {
+  if (!(this instanceof Ir))
+    return new Ir(data,options);
+
   Stock.apply(this,arguments);
   this.df = new Df(this);
   this.daycount = pyfy.daycount.d_30_360;

@@ -1,18 +1,20 @@
 /*global pyfy,Base,ascending*/
 
-function Data(d) {
+pyfy.data = pyfy.Data = Data;
+
+function Data(data,options) {
+  if (!(this instanceof Data))
+    return new Data(data,options);
  Base.apply(this,arguments);
  this.data = {};
  this._dates = [];
- if (d) this.update(d);
+ if (data) this.update(data);
 }
-
-pyfy.Data = Data;
 
 Data.prototype = new Base();
 
 Data.prototype.rawDates = function(query) {
-  query = pyfy.query(this.ID,query)
+  query = pyfy.query(this.ID,query);
   var cache = query.cache[this.ID];
 
   if (!cache.rawDates) {

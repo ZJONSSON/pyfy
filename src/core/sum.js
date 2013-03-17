@@ -1,10 +1,11 @@
 /*global pyfy,Base*/
 
-pyfy.sum = function(d) {
-  return new Sum(d);
-};
+pyfy.sum = Sum;
 
 function Sum(d) {
+  if (!(this instanceof Sum))
+    return new Sum(d);
+
   this.parents = d;
 }
 

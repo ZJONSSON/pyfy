@@ -3,6 +3,8 @@
 pyfy.Neg = Neg;
 
 function Neg(d) {
+  if (!(this instanceof Neg))
+    return new Neg();
   Derived.call(this,d);
 }
 

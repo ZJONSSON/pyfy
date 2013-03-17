@@ -5,20 +5,23 @@ pyfy.logNorm = function(s,vol,r) {
 };
 
 
-function logNorm(s,r,vol) {
+function LogNorm(s,r,vol) {
+  if (!(this instanceof LogNorm))
+    return new LogNorm(s,r,vol);
+
   Wiener.apply(this);
   this.s = s || 0;
   this.r = r || 0;
   this.vol = vol || 0;
 }
 
-logNorm.prototype = new Wiener();
+LogNorm.prototype = new Wiener();
 
-logNorm.prototype.inputs = function() {
+LogNorm.prototype.inputs = function() {
   return [this.s,this.r,this.vol]
 };
 
-Norm.prototype.fn = function(query,d) {
+LogNorm.prototype.fn = function(query,d) {
   if (query.cache[this.ID].values.length == 0) {
     var d0 = new Date();
     query.cache[this.ID].values[d0] = s 

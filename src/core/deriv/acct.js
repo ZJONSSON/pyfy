@@ -1,18 +1,15 @@
 /*global pyfy,Derived*/
 
-pyfy.Acct = Acct;
-
-pyfy.acct = function(d) {
-  return new Acct(d);
-};
+pyfy.acct = Acct;
 
 function Acct(d) {
+  if (!(this instanceof Acct))
+    return new Acct(d);
   Derived.call(this,d);
   this.start = d || 0;
 }
 
 Acct.prototype = new Derived();
-
 
 Acct.prototype.fn = function(query,d) {
   var dates = query.dates(this.parent),
