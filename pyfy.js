@@ -267,6 +267,12 @@
     if (prev == next) return nextVal;
     return prev < d < next ? prevVal + (nextVal - prevVal) * (d - prev) / (next - prev) : nextVal;
   };
+  pyfy.stream = Stream;
+  function Stream(data, options) {
+    if (!(this instanceof Stream)) return new Stream(data, options);
+    Data.apply(this, arguments);
+  }
+  Stream.prototype = new Data();
   pyfy.interval = function(start, dm, no, val) {
     var interval = [];
     for (var i = 0; i < no + 1; i++) {

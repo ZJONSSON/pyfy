@@ -23,7 +23,6 @@ Data.prototype.rawDates = function(query) {
       cache.rawDates[e] = e;
     });
   }
-
   return cache.rawDates;
 };
 

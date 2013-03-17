@@ -20,6 +20,7 @@ all: \
 	src/core/data/flow.js \
 	src/core/data/stock.js \
 	src/core/data/price.js \
+	src/core/data/stream.js \
 	src/core/data/interval.js \
 	src/core/derived.js \
 	src/core/deriv/period.js \
