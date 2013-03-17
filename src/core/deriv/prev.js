@@ -1,8 +1,10 @@
 /*global pyfy,Derived*/
 
-pyfy.Prev = Prev;
+pyfy.prev = Prev;
 
 function Prev(d,start) {
+  if (!(this instanceof Prev))
+    return new Prev(d,start);
   Derived.call(this,d);
   this.default = start || 0;
 }

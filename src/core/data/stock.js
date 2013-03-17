@@ -1,14 +1,12 @@
 /*global pyfy,Data*/
 
-function Stock() {
+pyfy.stock = Stock;
+
+function Stock(data,options) {
+  if (!(this instanceof Stock))
+    return new Stock(data,options);
   Data.apply(this,arguments);
 }
-
-pyfy.Stock = Stock;
-
-pyfy.stock = function(d) {
-  return new Stock(d);
-};
 
 Stock.prototype = new Data();
 

@@ -1,8 +1,10 @@
 /*global pyfy,Derived*/
 
-pyfy.Diff = Diff;
+pyfy.diff = Diff;
 
 function Diff(d) {
+  if (!(this instanceof Diff))
+    return new Diff();
   Derived.call(this,d);
 }
 

@@ -1,14 +1,15 @@
 /*global pyfy,Base*/
 
-pyfy.norm = function(s,vol,r) {
-  return new Norm(s,vol,r);
-};
+pyfy.norm = Norm;
 
 function rndNorm() {
   return (Math.random()*2-1)+(Math.random()*2-1)+(Math.random()*2-1);
 }
 
 function Norm(s,r,vol) {
+  if (!(this instanceof Norm))
+    return new Norm(s,r,vol);
+
   Base.apply(this);
   this.s = s || 0;
   this.r = r || 0;

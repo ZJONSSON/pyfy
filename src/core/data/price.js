@@ -1,11 +1,9 @@
 /*global pyfy,Data*/
-pyfy.Price = Price;
+pyfy.price = Price;
 
-pyfy.price = function(d) {
-  return new Price(d);
-};
-
-function Price() {
+function Price(data,options) {
+  if (!(this instanceof Price))
+    return new Price(data,options);
   Data.apply(this,arguments);
 }
 

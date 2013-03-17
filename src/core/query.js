@@ -1,13 +1,19 @@
 /*global pyfy,ascending*/
+
+pyfy.Query = Query;
+
 pyfy.query = function(id,query) {
   query = query || new Query();
-  query.cache[id] = query.cache[id] || {values:{}};
-  query.cache[id].values = query.cache[id].values || {};
+  if (id) {
+    query.cache[id] = query.cache[id] || {values:{}};
+    query.cache[id].values = query.cache[id].values || {};
+  }
   return query;
 };
 
 function Query() {
-  this.rawDates = {};
+  if (!(this instanceof Query))
+    return new Query();
   this.cache = {};
 }
 

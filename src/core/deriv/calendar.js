@@ -3,6 +3,8 @@
 pyfy.Calendar = Calendar;
 
 function Calendar(d,calendar) {
+  if (!(this instanceof Calendar))
+    return new Calendar();
   Derived.call(this,d);
   if (calendar) this.calendar = calendar;
 }

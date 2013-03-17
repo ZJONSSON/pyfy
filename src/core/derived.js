@@ -1,8 +1,10 @@
 /*global pyfy,Base*/
 
-pyfy.Derived = Derived ;
+pyfy.derived = pyfy.Derived = Derived ;
 
 function Derived(d,fn) {
+  if (!(this instanceof Derived))
+    return new Derived(d,fn);
   Base.call(this,arguments);
   this.parent = d || new Base();
   if (fn) this.fn = fn;

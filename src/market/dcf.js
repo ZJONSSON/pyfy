@@ -1,7 +1,9 @@
 /*global pyfy,Derived*/
-pyfy.Dcf = Dcf;
+pyfy.dcf = Dcf;
 
 function Dcf(parent,daycount) {
+  if (!(this instanceof Dcf))
+    return new Operator(parent,daycount);
   Derived.call(this,parent);
   if (daycount !== undefined) this.setDaycount(daycount);
 }
