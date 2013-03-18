@@ -274,11 +274,12 @@
   }
   Stream.prototype = new Data();
   pyfy.interval = function(start, dm, no, val) {
+    start = start || pyfy.util.today();
     var interval = [];
     for (var i = 0; i < no + 1; i++) {
       interval.push({
         x: new Date(start.getFullYear(), start.getMonth() + i * dm, start.getDate()),
-        y: val || !i ? 0 : 1
+        y: !i ? 0 : val || 1
       });
     }
     return pyfy.flow(interval);
@@ -398,7 +399,9 @@
     cache.dateMap = {};
     cache.rawDates = {};
     for (var pd in this.parent.rawDates(query)) {
-      var d = this.calendar(new Date(+pd)).valueOf();
+      var d = new Date(+pd);
+      while (d != (d = this.calendar(d))) {}
+      d = d.valueOf();
       cache.rawDates[d] = +d;
       cache.dateMap[d] = +pd;
     }
@@ -410,7 +413,7 @@
   };
   Calendar.prototype.calendar = function(d) {
     var weekday = d.getDay();
-    return weekday === 0 || weekday === 6 ? this.calendar(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) : d;
+    return weekday === 0 || weekday === 6 ? new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) : d;
   };
   pyfy.operator = pyfy.Operator = Operator;
   var ops = {

@@ -19,7 +19,9 @@ Calendar.prototype.rawDates = function(query) {
   cache.rawDates = {};
 
   for (var pd in this.parent.rawDates(query)) {
-    var d = this.calendar(new Date(+pd)).valueOf();
+    var d = new Date(+pd);
+    while (d != (d = this.calendar(d))) {};
+    d = d.valueOf()
     cache.rawDates[d] = +d;
     cache.dateMap[d] = +pd;
   }
@@ -34,5 +36,5 @@ Calendar.prototype.fn = function(query,d) {
 
 Calendar.prototype.calendar = function(d) {
   var weekday = d.getDay();
-  return (weekday === 0 || weekday === 6) ? this.calendar(new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)) : d;
+  return (weekday === 0 || weekday === 6) ? new Date(d.getFullYear(),d.getMonth(),d.getDate()+1) : d;
 };
