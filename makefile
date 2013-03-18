@@ -12,6 +12,11 @@ all: \
 .INTERMEDIATE pyfy.js: \
 	src/start.js \
 	src/util.js \
+	src/market/calendar.js \
+	src/market/calendar/weekday.js \
+	src/market/calendar/easter.js \
+	src/market/calendar/target.js \
+	src/market/calendar/is.js \
 	src/core/query.js \
 	src/core/base.js \
 	src/core/const.js \

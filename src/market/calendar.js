@@ -1,1 +1,2 @@
+/*global pyfy*/
 pyfy.calendar = {};

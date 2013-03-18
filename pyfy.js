@@ -27,6 +27,11 @@
     if (i === undefined) i = 0;
     return new Date(d.getFullYear(), d.getMonth(), d.getDate() + i);
   };
+  pyfy.util.nextWeekday = function(date, weekday) {
+    var currentWeekday = date.getDay();
+    var dt = currentWeekday > weekday ? weekday + 7 - currentWeekday : weekday - currentWeekday;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + dt);
+  };
   function ascending(a, b) {
     return +a - b;
   }
@@ -41,6 +46,41 @@
       if (f.call(a, a[mid], mid) < x) lo = mid + 1; else hi = mid;
     }
     return lo;
+  };
+  pyfy.calendar = {};
+  pyfy.calendar.weekday = function(d) {
+    var weekday = d.getDay();
+    return weekday !== 0 && weekday != 6;
+  };
+  pyfy.calendar.easter = function(date, dt) {
+    dt = dt || [ 1, -2 ];
+    var y, c, n, k, i, j, l, m, d;
+    if (1 < date.getMonth() < 4) {
+      y = date.getFullYear();
+      c = ~~(y / 100);
+      n = y - 19 * ~~(y / 19);
+      k = ~~((c - 17) / 25);
+      i = c - ~~(c / 4) - ~~((c - k) / 3) + 19 * n + 15;
+      i = i - 30 * ~~(i / 30);
+      i = i - i / 28 * (1 - ~~(i / 28) * ~~(29 / (i + 1)) * ~~((21 - n) / 11));
+      j = y + ~~(y / 4) + i + 2 - c + ~~(c / 4);
+      j = j - 7 * ~~(j / 7);
+      l = i - j;
+      m = 3 + ~~((l + 40) / 44) - 1;
+      d = Math.round(l + 28 - 31 * ~~(m / 4));
+      return dt.every(function(dt) {
+        return date - new Date(y, m, d + dt);
+      });
+    }
+    return true;
+  };
+  pyfy.calendar.target = function(date) {
+    var m = date.getMonth(), d = date.getDate();
+    return pyfy.calendar.weekday(date) && pyfy.calendar.easter(date, [ +1, -2 ]) && !(m === 0 && d == 1) && !(m == 11 && (d == 26 || d == 25)) && !(m == 4 && d == 1);
+  };
+  pyfy.calendar.is = function(date) {
+    var y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
+    return pyfy.calendar.weekday(date) && pyfy.calendar.easter(date, [ +1, -2, -3, +39, 50 ]) && !(m == 5 && d == 17) && !(m === 0 && d == 1) && !(m == 11 && (d == 26 || d == 25)) && !(m == 4 && d == 1) && !(m == 7 && date - pyfy.util.nextWeekday(new Date(y, 7, 1), 1) === 0) && !(m == 3 && date - pyfy.util.nextWeekday(new Date(y, 3, 19), 4) === 0);
   };
   pyfy.Query = Query;
   pyfy.query = function(id, query) {
@@ -388,7 +428,7 @@
   };
   pyfy.Calendar = Calendar;
   function Calendar(d, calendar) {
-    if (!(this instanceof Calendar)) return new Calendar();
+    if (!(this instanceof Calendar)) return new Calendar(d, calendar);
     Derived.call(this, d);
     if (calendar) this.calendar = calendar;
   }
@@ -399,11 +439,17 @@
     cache.dateMap = {};
     cache.rawDates = {};
     for (var pd in this.parent.rawDates(query)) {
-      var d = new Date(+pd);
-      while (d != (d = this.calendar(d))) {}
-      d = d.valueOf();
-      cache.rawDates[d] = +d;
-      cache.dateMap[d] = +pd;
+      var date = new Date(+pd), calendar = [].concat(this.calendar), i = 0;
+      while (!calendar.every(function(d) {
+        var fn = typeof d === "string" ? pyfy.calendar[d] : d;
+        return fn(date);
+      }, this)) {
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        if (i++ > 31) throw "Calendar function always returns false";
+      }
+      date = date.valueOf();
+      cache.rawDates[date] = +date;
+      cache.dateMap[date] = +pd;
     }
     return cache.rawDates;
   };
@@ -411,10 +457,7 @@
     var cache = query.cache[this.ID];
     return query.fetch(this.parent, cache.dateMap[d] || this.calendar(d));
   };
-  Calendar.prototype.calendar = function(d) {
-    var weekday = d.getDay();
-    return weekday === 0 || weekday === 6 ? new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) : d;
-  };
+  Calendar.prototype.calendar = pyfy.calendar.weekday;
   pyfy.operator = pyfy.Operator = Operator;
   var ops = {
     add: function(a, b) {
