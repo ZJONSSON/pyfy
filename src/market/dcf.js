@@ -10,17 +10,18 @@ function Dcf(parent,daycount) {
 
 Dcf.prototype = new Derived();
 
-Dcf.prototype.fn = function(query) {
+Dcf.prototype.fn = function(query,d) {
   var cache = query.cache[this.ID];
-  if (Object.keys(cache.values).length) return 0;
-  var dates = query.dates(this);
-  cache.values = {};
-
-  dates.slice(1).forEach(function(d,i) {
-    var d1 = pyfy.util.dateParts(dates[i]),
-        d2 = pyfy.util.dateParts(d);
-    cache.values[d] = this.daycount(d1,d2);
-  },this);
+  if (!Object.keys(cache.values).length) {
+    var dates = query.dates(this);
+    cache.values = {};
+    dates.slice(1).forEach(function(d,i) {
+      var d1 = pyfy.util.dateParts(dates[i]),
+          d2 = pyfy.util.dateParts(d);
+      cache.values[d] = (dates[i]) ? this.daycount(d1,d2)*query.fetch(this.parent,d) : 0 ;
+    },this);
+  }
+  return cache.values[d] || 0;
 };
 
 Dcf.prototype.daycount = pyfy.daycount.d_30_360;

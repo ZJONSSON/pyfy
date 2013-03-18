@@ -154,7 +154,7 @@
     return pyfy.query().get(this, dates);
   };
   Base.prototype.x = function(dates) {
-    return pyfy.query().y(this, dates);
+    return pyfy.query().x(this, dates);
   };
   Base.prototype.val = function(dates) {
     return pyfy.query().val(this, dates);
@@ -281,7 +281,9 @@
         y: val || !i ? 0 : 1
       });
     }
-    return pyfy.flow(interval);
+    interval = pyfy.flow(interval);
+    interval.no = no;
+    return interval;
   };
   pyfy.derived = pyfy.Derived = Derived;
   function Derived(d, fn) {
@@ -491,15 +493,17 @@
     if (daycount !== undefined) this.setDaycount(daycount);
   }
   Dcf.prototype = new Derived();
-  Dcf.prototype.fn = function(query) {
+  Dcf.prototype.fn = function(query, d) {
     var cache = query.cache[this.ID];
-    if (Object.keys(cache.values).length) return 0;
-    var dates = query.dates(this);
-    cache.values = {};
-    dates.slice(1).forEach(function(d, i) {
-      var d1 = pyfy.util.dateParts(dates[i]), d2 = pyfy.util.dateParts(d);
-      cache.values[d] = this.daycount(d1, d2);
-    }, this);
+    if (!Object.keys(cache.values).length) {
+      var dates = query.dates(this);
+      cache.values = {};
+      dates.slice(1).forEach(function(d, i) {
+        var d1 = pyfy.util.dateParts(dates[i]), d2 = pyfy.util.dateParts(d);
+        cache.values[d] = dates[i] ? this.daycount(d1, d2) * query.fetch(this.parent, d) : 0;
+      }, this);
+    }
+    return cache.values[d] || 0;
   };
   Dcf.prototype.daycount = pyfy.daycount.d_30_360;
   Dcf.prototype.setDaycount = function(d) {
@@ -536,6 +540,30 @@
     if (!last) return d == dates[pos] ? 1 : 0;
     var dcf = this.parent.daycount(pyfy.util.dateParts(last), pyfy.util.dateParts(d));
     return query.fetch(this, last) * Math.exp(-query.fetch(this.parent, d) * dcf);
+  };
+  pyfy.bond = Bond;
+  function Bond(start, dm, num, rate, notional, daycount) {
+    if (!(this instanceof Bond)) return new Bond(start, dm, num, rate, notional, daycount);
+    pyfy.derived.apply(this);
+    this.notional = notional || 1;
+    this.daycount = daycount;
+    this.rate = rate;
+    this.schedule = pyfy.interval(start, dm, num).div(num);
+    this.generate();
+  }
+  Bond.prototype = new pyfy.derived();
+  Bond.prototype.generate = function() {
+    this.bal = pyfy.acct(this.notional || 1);
+    this.p_scheduled = this.schedule.mul(this.notional);
+    this.p = this.schedule.mul(this.notional);
+    this.bal.setParent(this.p.neg());
+    this.i = this.bal.prev().dcf().mul(this.rate);
+    this.setParent(this.p.add(this.i));
+  };
+  Bond.prototype.setSchedule = function(d) {
+    this.schedule = d;
+    this.generate();
+    return this;
   };
   function Ziggurat() {
     var jsr = 123456789;
