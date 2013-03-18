@@ -281,9 +281,7 @@
         y: val || !i ? 0 : 1
       });
     }
-    interval = pyfy.flow(interval);
-    interval.no = no;
-    return interval;
+    return pyfy.flow(interval);
   };
   pyfy.derived = pyfy.Derived = Derived;
   function Derived(d, fn) {
