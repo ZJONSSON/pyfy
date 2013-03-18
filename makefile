@@ -41,6 +41,7 @@ all: \
 	src/market/daycount/d_act_act.js \
 	src/market/dcf.js \
 	src/market/ir.js \
+	src/market/bond.js \
 	src/stat/ziggurat.js \
 	src/stat/norm.js \
 	src/stat/wiener.js \
