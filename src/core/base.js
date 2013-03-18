@@ -64,7 +64,7 @@ Base.prototype.y = function(dates) {
 };
 
 Base.prototype.x = function(dates) {
-  return pyfy.query().y(this,dates);
+  return pyfy.query().x(this,dates);
 };
 
 Base.prototype.val = function(dates) {
