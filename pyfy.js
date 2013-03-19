@@ -105,9 +105,11 @@
   Query.prototype.dates = function(obj) {
     var cache = this.getCache(obj);
     if (!cache.dates) {
-      cache.dates = obj.dates(this).map(function(d) {
-        return d.valueOf();
-      }).sort(ascending);
+      var rawDates = obj.rawDates(this), dates = cache.dates = [];
+      for (var date in rawDates) {
+        dates.push(rawDates[date]);
+      }
+      dates.sort(ascending);
     }
     return cache.dates;
   };
@@ -150,14 +152,6 @@
     if (!(this instanceof Base)) return new Base();
     this.ID = ID++;
   }
-  Base.prototype.dates = function(query) {
-    var rawDates = this.rawDates(query);
-    var dates = [];
-    for (var date in rawDates) {
-      dates.push(new Date(+rawDates[date]));
-    }
-    return dates.sort(ascending);
-  };
   Base.prototype.rawDates = function(query) {
     query = pyfy.query(this.ID, query);
     var cache = query.cache[this.ID];
@@ -198,6 +192,9 @@
   };
   Base.prototype.val = function(dates) {
     return pyfy.query().val(this, dates);
+  };
+  Base.prototype.dates = function() {
+    return pyfy.query().dates(this);
   };
   pyfy.const = Const;
   function Const(data, options) {

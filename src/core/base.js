@@ -10,14 +10,6 @@ function Base() {
   this.ID = ID++;
 }
 
-Base.prototype.dates = function(query) {
-  var rawDates = this.rawDates(query);
-  var dates = [];
-  for (var date in rawDates) {
-    dates.push(new Date(+rawDates[date]));
-  }
-  return dates.sort(ascending);
-};
 
 Base.prototype.rawDates = function(query) {
   query = pyfy.query(this.ID,query);
@@ -69,4 +61,8 @@ Base.prototype.x = function(dates) {
 
 Base.prototype.val = function(dates) {
   return pyfy.query().val(this,dates);
+};
+
+Base.prototype.dates = function() {
+  return pyfy.query().dates(this);
 };

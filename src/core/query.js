@@ -24,9 +24,13 @@ Query.prototype.getCache = function(obj) {
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
   if (!cache.dates) {
-   cache.dates = obj.dates(this)
-    .map(function(d) { return d.valueOf(); })
-    .sort(ascending);
+    var rawDates = obj.rawDates(this),
+        dates = cache.dates = [];
+
+    for (var date in rawDates) {
+      dates.push(rawDates[date]);
+    }
+    dates.sort(ascending);
   }
   return cache.dates;
 };
