@@ -1,24 +1,22 @@
 /*global pyfy,Base*/
 
-function rndNorm() {
-  return (Math.random()*2-1)+(Math.random()*2-1)+(Math.random()*2-1);
-}
-
 pyfy.wiener = Wiener;
 
-function Wiener() {
+function Wiener(random) {
   if (!(this instanceof Wiener))
-    return new Wiener();
+    return new Wiener(random);
 
   Base.apply(this);
   this.change= this.diff(this);
+  this.random = random || new Random();
+  this.inputs = [random]
 }
 
 Wiener.prototype = new Base();
 
 Wiener.prototype.rawDates = function(query) {
   var res = {};
-  if (query && query.cache[this.ID].dates) {
+  if (query && query.cache[this.ID] && query.cache[this.ID].dates) {
     query.cache[this.ID].dates.forEach(function(d) {
       res[d] = d;
     });
@@ -41,7 +39,7 @@ Wiener.prototype.fn = function(query,d) {
   // If we are appending we push and update last
   if (d > cache.last.x) {
     cache.dates.push(d);
-    val = cache.last.y + rndNorm()*(d-cache.last.x)/pyfy.util.DAYMS/365.25;
+    val = cache.last.y + query.fetch(this.random,d)*(d-cache.last.x)/pyfy.util.DAYMS/365.25;
     cache.last = {x:d, y:val};
     return val;
   }
@@ -49,7 +47,7 @@ Wiener.prototype.fn = function(query,d) {
   // If we are pre-pending, insert and update first
   if (d < cache.first.x) {
     cache.dates.slice(0,0,d) ;
-    val = cache.min.y - rndNorm()*(cache.first.x-d)/pyfy.util.DAYMS/365.25;
+    val = cache.min.y - query.fetch(this.random,d) *(cache.first.x-d)/pyfy.util.DAYMS/365.25;
     cache.first = {x:d,y:val};
     return val;
   }

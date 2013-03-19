@@ -48,8 +48,10 @@ all: \
 	src/market/ir.js \
 	src/market/bond.js \
 	src/stat/ziggurat.js \
-	src/stat/norm.js \
+	src/stat/random.js \
 	src/stat/wiener.js \
+	src/stat/lognorm.js \
+	src/stat/correl.js \
 	src/end.js
 
 pyfy.js: Makefile

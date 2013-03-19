@@ -685,39 +685,33 @@
   }
   var z = new Ziggurat();
   var rndNorm = pyfy.rndNorm = z.nextGaussian;
-  pyfy.norm = Norm;
-  function rndNorm() {
+  function Random() {
+    if (!(this instanceof Random)) return new Random();
+    Base.call(this);
+  }
+  pyfy.random = Random;
+  Random.prototype = new Base();
+  Random.prototype.fn = function() {
     return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
-  }
-  function Norm(s, r, vol) {
-    if (!(this instanceof Norm)) return new Norm(s, r, vol);
-    Base.apply(this);
-    this.s = s || 0;
-    this.r = r || 0;
-    this.vol = vol || 0;
-  }
-  Norm.prototype = new Base();
-  Norm.prototype.inputs = function() {
-    return [ this.s, this.r, this.vol ];
   };
-  Norm.prototype.fn = function(cache, d, i) {
-    var s = this.s, self = this, dates = cache.__dates__;
-    var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
-    return s * Math.exp(e);
+  Random.prototype.correl = function(correl) {
+    return pyfy.correl(this, correl);
   };
-  function rndNorm() {
-    return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
-  }
+  Random.prototype.wiener = function() {
+    return pyfy.wiener(this);
+  };
   pyfy.wiener = Wiener;
-  function Wiener() {
-    if (!(this instanceof Wiener)) return new Wiener();
+  function Wiener(random) {
+    if (!(this instanceof Wiener)) return new Wiener(random);
     Base.apply(this);
     this.change = this.diff(this);
+    this.random = random || new Random();
+    this.inputs = [ random ];
   }
   Wiener.prototype = new Base();
   Wiener.prototype.rawDates = function(query) {
     var res = {};
-    if (query && query.cache[this.ID].dates) {
+    if (query && query.cache[this.ID] && query.cache[this.ID].dates) {
       query.cache[this.ID].dates.forEach(function(d) {
         res[d] = d;
       });
@@ -740,7 +734,7 @@
     }
     if (d > cache.last.x) {
       cache.dates.push(d);
-      val = cache.last.y + rndNorm() * (d - cache.last.x) / pyfy.util.DAYMS / 365.25;
+      val = cache.last.y + query.fetch(this.random, d) * (d - cache.last.x) / pyfy.util.DAYMS / 365.25;
       cache.last = {
         x: d,
         y: val
@@ -749,7 +743,7 @@
     }
     if (d < cache.first.x) {
       cache.dates.slice(0, 0, d);
-      val = cache.min.y - rndNorm() * (cache.first.x - d) / pyfy.util.DAYMS / 365.25;
+      val = cache.min.y - query.fetch(this.random, d) * (cache.first.x - d) / pyfy.util.DAYMS / 365.25;
       cache.first = {
         x: d,
         y: val
@@ -768,5 +762,41 @@
   };
   Wiener.prototype.dates = function(query) {
     return query ? query.cache[this.ID].dates.all : [];
+  };
+  pyfy.logNorm = function(s, vol, r) {
+    return new Norm(s, vol, r);
+  };
+  function LogNorm(s, r, vol) {
+    if (!(this instanceof LogNorm)) return new LogNorm(s, r, vol);
+    Wiener.apply(this);
+    this.s = s || 0;
+    this.r = r || 0;
+    this.vol = vol || 0;
+  }
+  LogNorm.prototype = new Wiener();
+  LogNorm.prototype.inputs = function() {
+    return [ this.s, this.r, this.vol ];
+  };
+  LogNorm.prototype.fn = function(query, d) {
+    if (query.cache[this.ID].values.length == 0) {
+      var d0 = new Date();
+      query.cache[this.ID].values[d0] = s;
+      query.fetch(this.parent, d0);
+    }
+    return vol * Math.sqrt(dt) * query.fetch(this.parent, d);
+    var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
+    return s * Math.exp(e);
+  };
+  function Correl(parent, correl) {
+    if (!(this instanceof Correl)) return new Correl(parent, correl);
+    Random.call(this);
+    this.parent = parent;
+    this.correl = correl;
+  }
+  pyfy.correl = Correl;
+  Correl.prototype = new Random();
+  Correl.prototype.fn = function(query, d) {
+    var correl = query.fetch(this.correl, d);
+    return correl * query.fetch(this.parent, d) + Math.sqrt(1 - correl * correl) * this.parent.fn.call(this, query, d);
   };
 })();
