@@ -11,5 +11,5 @@ function Stock(data,options) {
 Stock.prototype = new Data();
 
 Stock.prototype._fn = function(d,last) {
-  return this.data[last];
+  return this.args.data[last];
 };

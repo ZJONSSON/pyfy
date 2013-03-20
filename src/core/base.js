@@ -8,6 +8,7 @@ function Base() {
   if (!(this instanceof Base))
     return new Base();
   this.ID = ID++;
+  this.args = {};
 }
 
 
@@ -15,16 +16,16 @@ Base.prototype.rawDates = function(query) {
   query = pyfy.query(this.ID,query);
   var cache = query.cache[this.ID];
 
-  if (!cache.rawDates) {
+  if (!cache.rawDates && this.args) {
+    var args = this.args;
     cache.rawDates = {};
-    
-    var inputs = typeof this.inputs === "function" ? this.inputs() : this.inputs;
-    [].concat(inputs)
-      .filter(function(d) { return d && d.rawDates; })
-      .forEach(function(input) {
-        for (var d in input.rawDates(query)) {
-          cache.rawDates[d] = +d;
-        }
+
+    Object.keys(args)
+      .forEach(function(key) {
+        if (args[key] && args[key].rawDates)
+          Object.keys(args[key].rawDates(query)).forEach(function(d) {
+            cache.rawDates[d] = +d;
+          });
       });
   }
   return cache.rawDates;
@@ -64,5 +65,8 @@ Base.prototype.val = function(dates) {
 };
 
 Base.prototype.dates = function() {
-  return pyfy.query().dates(this);
+  return pyfy.query().dates(this)
+    .map(function(d) {
+      return new Date(d);
+    });
 };

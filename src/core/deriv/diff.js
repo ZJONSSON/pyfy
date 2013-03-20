@@ -14,5 +14,5 @@ Diff.prototype.fn = function(query,d) {
   var dates = query.dates(this),
       datePos = pyfy.util.bisect(dates,d);
 
-  return (datePos) ? query.fetch(this.parent,d) - query.fetch(this.parent,dates[datePos-1]) : 0;
+  return (datePos) ? query.fetch(this.args.parent,d) - query.fetch(this.args.parent,dates[datePos-1]) : 0;
 };

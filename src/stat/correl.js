@@ -3,8 +3,8 @@ function Correl(parent,correl) {
   if (!(this instanceof Correl))
     return new Correl(parent,correl);
   Random.call(this);
-  this.parent = parent;
-  this.correl = correl;
+  this.args.parent = parent;
+  this.args.correl = correl;
 }
 
 pyfy.correl = Correl;
@@ -17,7 +17,8 @@ Correl.prototype = new Random();
 // sqrt of (1-correlation^2)
 
 Correl.prototype.fn = function(query,d) {
-  var correl = query.fetch(this.correl,d);
-  return correl * query.fetch(this.parent,d) +
-    Math.sqrt(1-correl*correl) * this.parent.fn.call(this,query,d);
+  var correl = query.fetch(this.args.correl,d);
+  console.log(correl)
+  return correl * query.fetch(this.args.parent,d) +
+    Math.sqrt(1-correl*correl) * this.args.parent.fn.call(this,query,d);
 };

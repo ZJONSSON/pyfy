@@ -22,7 +22,7 @@ suite.addBatch({
   "with parent" : {
     topic : new pyfy.Derived(parent),
     "inputs returns the parent" : function(_) {
-      assert.equal(_.inputs(),parent);
+      assert.equal(_.args["parent"],parent);
     },
     "dates are derived from parent" : function(_) {
       assert.deepEqual(_.dates(),testData.a.map(function(d) { return d.x; }));
