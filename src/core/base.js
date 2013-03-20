@@ -9,6 +9,12 @@ function Base() {
     return new Base();
   this.ID = ID++;
   this.args = {};
+  this.version = 0;
+}
+
+Base.prototype.arg = function(d,v) {
+  this.args[d] = v;
+  this.version+=1;
 }
 
 Base.prototype.fn = function() {

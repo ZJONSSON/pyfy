@@ -97,23 +97,28 @@
     if (!(this instanceof Query)) return new Query();
     this.cache = {};
   }
-  Query.prototype.getCache = function(obj) {
-    var cache = this.cache;
-    if (!cache[obj.ID]) {
+  Query.prototype.initCache = function(obj) {
+    if (!obj.ID) return false;
+    var clear = !this.cache[obj.ID] || this.cache[obj.ID].version != obj.version;
+    if (obj.args) Object.keys(obj.args).forEach(function(key) {
+      var parent = obj.args[key];
+      if (this.initCache(parent)) clear = true;
+    }, this);
+    if (clear) {
       this.cache[obj.ID] = {
         values: {},
-        children: []
+        version: obj.version
       };
-      if (obj.args) Object.keys(obj.args).forEach(function(key) {
-        var parent = obj.args[key];
-        var pc = this.getCache(parent);
-        if (pc) pc.children.push(this);
-      }, this);
     }
-    return cache[obj.ID];
+    return clear;
+  };
+  Query.prototype.getCache = function(obj) {
+    this.initCache(obj);
+    return this.cache[obj.ID];
   };
   Query.prototype.dates = function(obj) {
     var cache = this.getCache(obj);
+    if (!cache) return [];
     if (!cache.dates) {
       var rawDates = this.rawDates(obj), dates = cache.dates = [];
       for (var date in rawDates) {
@@ -126,11 +131,11 @@
   Query.prototype.rawDates = function(obj, rawDates) {
     var cache = this.getCache(obj);
     rawDates = rawDates || {};
-    if (!cache.rawDates) {
-      if (obj.rawDates) obj.rawDates(rawDates);
+    if (cache && !cache.rawDates) {
       if (obj.args) Object.keys(obj.args).forEach(function(key) {
-        this.rawDates(obj.args[key], rawDates);
+        rawDates = this.rawDates(obj.args[key], rawDates);
       }, this);
+      if (obj.rawDates) rawDates = obj.rawDates(rawDates);
     }
     return rawDates;
   };
@@ -173,7 +178,12 @@
     if (!(this instanceof Base)) return new Base();
     this.ID = ID++;
     this.args = {};
+    this.version = 0;
   }
+  Base.prototype.arg = function(d, v) {
+    this.args[d] = v;
+    this.version += 1;
+  };
   Base.prototype.fn = function() {
     return 0;
   };
@@ -348,6 +358,14 @@
     this.args.fin = fin || Infinity;
   }
   Period.prototype = new Derived();
+  Period.prototype.rawDates = function(rawDates) {
+    var res = {};
+    if (rawDates) Object.keys(rawDates).forEach(function(key) {
+      var d = rawDates[key];
+      if (d >= this.args.start && d <= this.args.fin) res[d] = d;
+    }, this);
+    return res;
+  };
   Period.prototype.fn = function(query, d) {
     return d >= this.args.start && d <= this.args.fin ? query.fetch(this.args.parent, d) : 0;
   };
