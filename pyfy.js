@@ -98,20 +98,41 @@
     this.cache = {};
   }
   Query.prototype.getCache = function(obj) {
-    return this.cache[obj.ID] || (this.cache[obj.ID] = {
-      values: {}
-    });
+    var cache = this.cache;
+    if (!cache[obj.ID]) {
+      this.cache[obj.ID] = {
+        values: {},
+        children: []
+      };
+      if (obj.args) Object.keys(obj.args).forEach(function(key) {
+        var parent = obj.args[key];
+        var pc = this.getCache(parent);
+        if (pc) pc.children.push(this);
+      }, this);
+    }
+    return cache[obj.ID];
   };
   Query.prototype.dates = function(obj) {
     var cache = this.getCache(obj);
-    if (!cache.dates && obj.rawDates) {
-      var rawDates = obj.rawDates(this), dates = cache.dates = [];
+    if (!cache.dates) {
+      var rawDates = this.rawDates(obj), dates = cache.dates = [];
       for (var date in rawDates) {
         dates.push(rawDates[date]);
       }
       dates.sort(ascending);
     }
     return cache.dates;
+  };
+  Query.prototype.rawDates = function(obj, rawDates) {
+    var cache = this.getCache(obj);
+    rawDates = rawDates || {};
+    if (!cache.rawDates) {
+      if (obj.rawDates) obj.rawDates(rawDates);
+      if (obj.args) Object.keys(obj.args).forEach(function(key) {
+        this.rawDates(obj.args[key], rawDates);
+      }, this);
+    }
+    return rawDates;
   };
   Query.prototype.y = function(obj, dates) {
     return this.get(obj, dates);
@@ -153,23 +174,10 @@
     this.ID = ID++;
     this.args = {};
   }
-  Base.prototype.rawDates = function(query) {
-    query = pyfy.query(this.ID, query);
-    var cache = query.cache[this.ID];
-    if (!cache.rawDates && this.args) {
-      var args = this.args;
-      cache.rawDates = {};
-      Object.keys(args).forEach(function(key) {
-        if (args[key] && args[key].rawDates) Object.keys(args[key].rawDates(query)).forEach(function(d) {
-          cache.rawDates[d] = +d;
-        });
-      });
-    }
-    return cache.rawDates;
-  };
   Base.prototype.fn = function() {
     return 0;
   };
+  Base.prototype.rawDates = undefined;
   [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
@@ -236,16 +244,12 @@
     if (data) this.update(data);
   }
   Data.prototype = new Base();
-  Data.prototype.rawDates = function(query) {
-    query = pyfy.query(this.ID, query);
-    var cache = query.cache[this.ID];
-    if (!cache.rawDates) {
-      cache.rawDates = {};
-      this._dates.forEach(function(e) {
-        cache.rawDates[e] = e;
-      });
-    }
-    return cache.rawDates;
+  Data.prototype.rawDates = function(rawDates) {
+    rawDates = rawDates || {};
+    this._dates.forEach(function(e) {
+      rawDates[e] = e;
+    });
+    return rawDates;
   };
   Data.prototype.update = function(a) {
     if (arguments.length === 0) return this;
@@ -477,7 +481,7 @@
   });
   function Operator(op, left, right) {
     if (!(this instanceof Operator)) return new Operator(op, left, right);
-    Base.apply(this, arguments);
+    Base.apply(this);
     this.args.left = left;
     this.args.right = right;
     this.op = op;
@@ -788,7 +792,6 @@
   Correl.prototype = new Random();
   Correl.prototype.fn = function(query, d) {
     var correl = query.fetch(this.args.correl, d);
-    console.log(correl);
     return correl * query.fetch(this.args.parent, d) + Math.sqrt(1 - correl * correl) * this.args.parent.fn.call(this, query, d);
   };
 })();

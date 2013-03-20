@@ -11,29 +11,12 @@ function Base() {
   this.args = {};
 }
 
-
-Base.prototype.rawDates = function(query) {
-  query = pyfy.query(this.ID,query);
-  var cache = query.cache[this.ID];
-
-  if (!cache.rawDates && this.args) {
-    var args = this.args;
-    cache.rawDates = {};
-
-    Object.keys(args)
-      .forEach(function(key) {
-        if (args[key] && args[key].rawDates)
-          Object.keys(args[key].rawDates(query)).forEach(function(d) {
-            cache.rawDates[d] = +d;
-          });
-      });
-  }
-  return cache.rawDates;
-};
-
 Base.prototype.fn = function() {
   return 0;
 };
+
+// Placeholder
+Base.prototype.rawDates = undefined;
 
 // Allow derived object by chaining
 [Cumul,Diff,Prev,Max,Min,Neg,Calendar,Dcf,Period,Derived].forEach(function(Fn) {

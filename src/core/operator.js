@@ -19,7 +19,7 @@ function Operator(op,left,right) {
   if (!(this instanceof Operator))
     return new Operator(op,left,right);
 
-  Base.apply(this,arguments);
+  Base.apply(this);
   this.args.left = left;
   this.args.right = right;
   this.op = op;

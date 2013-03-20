@@ -13,10 +13,10 @@ suite.addBatch({
       assert.equal(pyfy.base().ID-pyfy.base().ID,-1);
     }
   },
-  'rawDates' : {
+  'dates' : {
     topic : pyfy.base(),
-    'returns empty object by default' : function (_) {
-      assert.isEmpty(Object.keys(_.rawDates()));
+    'returns empty array by default' : function (_) {
+      assert.isEmpty(_.dates())
     }
   }
 });

@@ -18,7 +18,6 @@ Correl.prototype = new Random();
 
 Correl.prototype.fn = function(query,d) {
   var correl = query.fetch(this.args.correl,d);
-  console.log(correl)
   return correl * query.fetch(this.args.parent,d) +
     Math.sqrt(1-correl*correl) * this.args.parent.fn.call(this,query,d);
 };

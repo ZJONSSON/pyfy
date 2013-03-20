@@ -18,21 +18,46 @@ function Query() {
 }
 
 Query.prototype.getCache = function(obj) {
-  return (this.cache[obj.ID]) || (this.cache[obj.ID] = {values : {}});
+  var cache = this.cache;
+  if (!cache[obj.ID]) {
+    this.cache[obj.ID] = {values:{}, children:[]};
+    if (obj.args) Object.keys(obj.args).forEach(function(key) {
+      var parent = obj.args[key];
+      var pc = this.getCache(parent);
+      if (pc) pc.children.push(this);
+    },this);
+  }
+  return cache[obj.ID];
 };
+
 
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
-  if (!cache.dates && obj.rawDates) {
-    var rawDates = obj.rawDates(this),
+  if (!cache.dates) {
+    var rawDates = this.rawDates(obj),
         dates = cache.dates = [];
 
     for (var date in rawDates) {
       dates.push(rawDates[date]);
     }
+
     dates.sort(ascending);
   }
   return cache.dates;
+};
+
+Query.prototype.rawDates = function(obj,rawDates) {
+  var cache = this.getCache(obj);
+  rawDates = rawDates || {};
+
+  if (!cache.rawDates) {
+    if (obj.rawDates) obj.rawDates(rawDates);
+    if (obj.args) Object.keys(obj.args).forEach(function(key) {
+      this.rawDates(obj.args[key],rawDates);
+    },this);
+    //cache.rawDates = rawDates;
+  }
+  return rawDates;
 };
 
 Query.prototype.y = function(obj,dates) {

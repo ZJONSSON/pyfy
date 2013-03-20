@@ -13,17 +13,12 @@ function Data(data,options) {
 
 Data.prototype = new Base();
 
-Data.prototype.rawDates = function(query) {
-  query = pyfy.query(this.ID,query);
-  var cache = query.cache[this.ID];
-
-  if (!cache.rawDates) {
-    cache.rawDates = {};
-    this._dates.forEach(function(e) {
-      cache.rawDates[e] = e;
-    });
-  }
-  return cache.rawDates;
+Data.prototype.rawDates = function(rawDates) {
+  rawDates = rawDates || {};
+  this._dates.forEach(function(e) {
+    rawDates[e] = e;
+  });
+  return rawDates;
 };
 
 Data.prototype.update = function(a) {
