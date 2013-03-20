@@ -1,9 +1,10 @@
 /*global pyfy,Derived,Random*/
-function Correl(parent,correl) {
+function Correl(parent,correl,random) {
   if (!(this instanceof Correl))
     return new Correl(parent,correl);
   Random.call(this);
   this.args.parent = parent;
+  this.args.random = random || new Random();
   this.args.correl = correl;
 }
 
@@ -19,5 +20,5 @@ Correl.prototype = new Random();
 Correl.prototype.fn = function(query,d) {
   var correl = query.fetch(this.args.correl,d);
   return correl * query.fetch(this.args.parent,d) +
-    Math.sqrt(1-correl*correl) * this.args.parent.fn.call(this,query,d);
+    Math.sqrt(1-correl*correl) * query.fetch(this.args.random,d);
 };
