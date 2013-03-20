@@ -11,7 +11,7 @@ var suite = vows.describe("sum");
 
 suite.addBatch({
   "" : {
-    topic : pyfy.sum([sa,sb,fa,fb]),
+    topic : pyfy.sum(sa,sb,fa,fb),
     "has base as a prototype" :  function(_) {
       assert.isTrue(pyfy.Base.prototype.isPrototypeOf(_));
     },

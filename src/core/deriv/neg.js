@@ -11,5 +11,5 @@ function Neg(d) {
 Neg.prototype = new Derived();
 
 Neg.prototype.fn = function(query,d) {
-  return -query.fetch(this.parent,d);
+  return -query.fetch(this.args.parent,d);
 };

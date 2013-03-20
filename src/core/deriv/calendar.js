@@ -6,7 +6,7 @@ function Calendar(d,calendar) {
   if (!(this instanceof Calendar))
     return new Calendar(d,calendar);
   Derived.call(this,d);
-  if (calendar) this.calendar = calendar;
+  this.args.calendar = calendar || pyfy.calendar.weekday;
 }
 
 Calendar.prototype = new Derived();
@@ -18,9 +18,9 @@ Calendar.prototype.rawDates = function(query) {
   cache.dateMap = {};
   cache.rawDates = {};
 
-  for (var pd in this.parent.rawDates(query)) {
+  for (var pd in this.args.parent.rawDates(query)) {
     var date = new Date(+pd),
-        calendar = [].concat(this.calendar),
+        calendar = [].concat(this.args.calendar),
         i = 0;
 
     // Every calendar function must return true, otherwise we go to the next day
@@ -28,7 +28,7 @@ Calendar.prototype.rawDates = function(query) {
       var fn = (typeof d === "string") ?  pyfy.calendar[d] : d;
       return fn(date);
     },this)) {
-      date = new Date(date.getFullYear(),date.getMonth(),date.getDate()+1); 
+      date = new Date(date.getFullYear(),date.getMonth(),date.getDate()+1);
       // Prevent infinite loop if calendar function is wrongly specified 
       if (i++ > 31) throw "Calendar function always returns false";
     }
@@ -43,7 +43,7 @@ Calendar.prototype.rawDates = function(query) {
 
 Calendar.prototype.fn = function(query,d) {
   var cache = query.cache[this.ID];
-  return query.fetch(this.parent,cache.dateMap[d] || this.calendar(d));
+  return query.fetch(this.args.parent,cache.dateMap[d] || this.calendar(d));
 };
 
 Calendar.prototype.calendar = pyfy.calendar.weekday;

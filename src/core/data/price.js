@@ -10,8 +10,8 @@ function Price(data,options) {
 Price.prototype = new Data();
 
 Price.prototype._fn = function(d,prev,next) {
-  var prevVal = this.data[prev],
-    nextVal = this.data[next];
+  var prevVal = this.args.data[prev],
+    nextVal = this.args.data[next];
 
   if (prev == next) return nextVal;
 

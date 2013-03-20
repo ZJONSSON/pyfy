@@ -10,5 +10,5 @@ function Flow(data,options) {
 Flow.prototype = new Data();
 
 Flow.prototype.fn = function(query,d) {
-  return this.data[d] || 0;
+  return this.args.data[d] || 0;
 };

@@ -20,22 +20,18 @@ function Operator(op,left,right) {
     return new Operator(op,left,right);
 
   Base.apply(this,arguments);
-  this.left = left;
-  this.right = right;
+  this.args.left = left;
+  this.args.right = right;
   this.op = op;
 }
 
 Operator.prototype = new Base();
 
-Operator.prototype.inputs = function() {
-  return [this.left,this.right];
-};
-
 Operator.prototype.fn = function(query,d) {
   var left,right;
-  right = query.fetch(this.right,d);
+  right = query.fetch(this.args.right,d);
   // We can bypass further evaluation if the right side is zero in a multiplication
   if (!right && this.op =="mul") return 0;
-  left = query.fetch(this.left,d);
+  left = query.fetch(this.args.left,d);
   return ops[this.op](left,right);
 };

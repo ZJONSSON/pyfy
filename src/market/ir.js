@@ -8,18 +8,18 @@ function Ir(data,options) {
 
   Stock.apply(this,arguments);
   this.df = new Df(this);
-  this.daycount = pyfy.daycount.d_30_360;
+  this.args.daycount = pyfy.daycount.d_30_360;
 }
 
 Ir.prototype = new Stock();
 
 Ir.prototype.setDaycount = function(d) {
-  this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
+  this.args.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
   return this;
 };
 
 Ir.prototype._fn = function(d,last,next) {
-  return this.data[next];
+  return this.args.data[next];
 };
 
 
@@ -29,7 +29,7 @@ pyfy.df = function(d) {
 
 function Df(d,val) {
   Derived.call(this,d);
-  this.val = val;
+  this.args.val = val;
 }
 
 Df.prototype = new Dcf();
@@ -42,6 +42,6 @@ Df.prototype.fn = function(query,d) {
 
   var dcf = this.parent.daycount(pyfy.util.dateParts(last),pyfy.util.dateParts(d));
 
-  return query.fetch(this,last) * Math.exp(-query.fetch(this.parent,d)*dcf);
+  return query.fetch(this,last) * Math.exp(-query.fetch(this.args.parent,d)*dcf);
 };  
 

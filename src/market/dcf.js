@@ -18,7 +18,7 @@ Dcf.prototype.fn = function(query,d) {
     dates.slice(1).forEach(function(d,i) {
       var d1 = pyfy.util.dateParts(dates[i]),
           d2 = pyfy.util.dateParts(d);
-      cache.values[d] = (dates[i]) ? this.daycount(d1,d2)*query.fetch(this.parent,d) : 0 ;
+      cache.values[d] = (dates[i]) ? this.daycount(d1,d2)*query.fetch(this.args.parent,d) : 0 ;
     },this);
   }
   return cache.values[d] || 0;

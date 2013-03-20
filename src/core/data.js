@@ -6,7 +6,7 @@ function Data(data,options) {
   if (!(this instanceof Data))
     return new Data(data,options);
  Base.apply(this,arguments);
- this.data = {};
+ this.args.data = {};
  this._dates = [];
  if (data) this.update(data);
 }
@@ -30,14 +30,14 @@ Data.prototype.update = function(a) {
   if (arguments.length === 0) return this;
   if (!isNaN(a)) {
     var x = pyfy.util.today().valueOf();
-    this.data[x] = a;
+    this.args.data[x] = a;
   } else {
     [].concat(a)
       .forEach(function(d) {
-        this.data[d.x.valueOf()] = d.y;
+        this.args.data[d.x.valueOf()] = d.y;
       },this);
   }
-  this._dates = Object.keys(this.data)
+  this._dates = Object.keys(this.args.data)
     .map(function(key) {
       return +key;
     })
@@ -46,13 +46,13 @@ Data.prototype.update = function(a) {
 };
 
 Data.prototype.set = function(a) {
-  this.data = {};
+  this.args.data = {};
   return this.update(a);
 };
 
 Data.prototype.fn = function(query,d) {
-  if (!Object.keys(this.data).length) return 0;
-  if (this.data[d]) return this.data[d];
+  if (!Object.keys(this.args.data).length) return 0;
+  if (this.args.data[d]) return this.args.data[d];
 
   var dates = query.dates(this),
       next = pyfy.util.bisect(dates,d),
