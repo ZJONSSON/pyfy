@@ -52,6 +52,7 @@ all: \
 	src/stat/wiener.js \
 	src/stat/lognorm.js \
 	src/stat/correl.js \
+	src/stat/simul.js \
 	src/end.js
 
 pyfy.js: Makefile
