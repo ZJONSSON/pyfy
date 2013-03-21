@@ -158,6 +158,7 @@
     }, this);
   };
   Query.prototype.get = function(obj, d) {
+    this.initCache(obj);
     if (!d) d = this.dates(obj);
     return [].concat(d).map(function(d) {
       return this.fetch(obj, d.valueOf());
@@ -165,7 +166,7 @@
   };
   Query.prototype.fetch = function(obj, d) {
     if (!isNaN(obj)) return obj;
-    var values = this.getCache(obj).values;
+    var values = this.cache[obj.ID].values;
     if (values[d] === undefined) {
       var fn = obj.fn(this, d.valueOf());
       if (fn !== undefined) values[d] = fn;
