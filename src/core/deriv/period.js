@@ -22,6 +22,6 @@ Period.prototype.rawDates = function(rawDates) {
   return res;
 };
 
-Period.prototype.fn = function(query,d) {
-  return (d >= this.args.start && d<= this.args.fin) ? query.fetch(this.args.parent,d) : 0;
+Period.prototype.fn = function(query,d,i) {
+  return (d >= this.args.start && d<= this.args.fin) ? query.fetch(this.args.parent,d,i) : 0;
 };

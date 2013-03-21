@@ -1,36 +1,34 @@
-/*global pyfy*/
-
-function Simul(count) {
-  if (!(this instanceof Simul))
-    return new Simul(count);
-  this.queries = [];
-  while (count--) {
-    this.queries.push(pyfy.query());
-  }
-}
+/*global pyfy,Query*/
 
 pyfy.simul = Simul;
 
-["y","val"].forEach(function(fn) {
-  Simul.prototype[fn] = function(obj,dates) {
-    return this.queries.map(function(q) {
-      return q[fn](obj,dates);
-    });
-  };
-});
+function Simul(num) {
+  if (!(this instanceof Simul))
+    return new Simul(num);
+  Query.call(this);
+  this.num = num;
+}
 
-Simul.prototype.mean = function(obj,dates) {
-  var res = this.y(obj,dates),
-      l = res.length;
+Simul.prototype = new Query();
 
-  res = res[0].map(function(d,i) {
-    var sum = 0;
-    res.forEach(function(d) {
-      sum+=d[i];
-    });
-    return sum/l;
-  });
+Simul.prototype.fetch = function(obj,d,i) {
+ if (!isNaN(obj)) return obj;  // in case it's a number
+  var values = this.cache[obj.ID].values;
+  values[d] = values[d] || [];
 
-  return res.length == 1 ? res[0] : res;
+  if (values[d][i] === undefined) {
+    var fn = obj.fn(this,d.valueOf(),i);
+    if (fn !== undefined) values[d][i] = fn;
+  }
+  return values[d][i];
 };
 
+Simul.prototype.get = function(obj) {
+  return [].concat(this.dates(obj))
+    .map(function(d) {
+      var res = [], i = this.num;
+      while(i--)
+        res.push(this.fetch(obj,d.valueOf(),i));
+      return res;
+    },this);
+};

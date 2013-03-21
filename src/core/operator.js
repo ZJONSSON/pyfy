@@ -27,11 +27,11 @@ function Operator(op,left,right) {
 
 Operator.prototype = new Base();
 
-Operator.prototype.fn = function(query,d) {
+Operator.prototype.fn = function(query,d,i) {
   var left,right;
-  right = query.fetch(this.args.right,d);
+  right = query.fetch(this.args.right,d,i);
   // We can bypass further evaluation if the right side is zero in a multiplication
   if (!right && this.op =="mul") return 0;
-  left = query.fetch(this.args.left,d);
+  left = query.fetch(this.args.left,d,i);
   return ops[this.op](left,right);
 };

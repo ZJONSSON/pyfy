@@ -11,8 +11,8 @@ function Prev(d,start) {
 
 Prev.prototype = new Derived();
 
-Prev.prototype.fn = function(query,d) {
+Prev.prototype.fn = function(query,d,i) {
   var dates = query.dates(this),
       datePos = pyfy.util.bisect(dates,d);
-  return (datePos > 0) ? query.fetch(this.args.parent,dates[datePos-1]) : this.default;  
+  return (datePos > 0) ? query.fetch(this.args.parent,dates[datePos-1],i) : this.default;  
 };
