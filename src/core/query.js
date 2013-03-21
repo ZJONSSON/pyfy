@@ -90,6 +90,7 @@ Query.prototype.val = function(obj,dates) {
 };
 
 Query.prototype.get = function(obj,d) {
+  this.initCache(obj);
   if (!d) d = this.dates(obj);
   return [].concat(d).map(function(d) {
     return this.fetch(obj,d.valueOf());
@@ -98,7 +99,7 @@ Query.prototype.get = function(obj,d) {
 
 Query.prototype.fetch = function(obj,d) {
   if (!isNaN(obj)) return obj;  // in case it's a number
-  var values = this.getCache(obj).values;
+  var values = this.cache[obj.ID].values;
 
   if (values[d] === undefined) {
     var fn = obj.fn(this,d.valueOf());
