@@ -17,8 +17,8 @@ Correl.prototype = new Random();
 // variable (using same function as parent) multiplied by
 // sqrt of (1-correlation^2)
 
-Correl.prototype.fn = function(query,d) {
-  var correl = query.fetch(this.args.correl,d);
-  return correl * query.fetch(this.args.parent,d) +
-    Math.sqrt(1-correl*correl) * query.fetch(this.args.random,d);
+Correl.prototype.fn = function(query,d,i) {
+  var correl = query.fetch(this.args.correl,d,i);
+  return correl * query.fetch(this.args.parent,d,i) +
+    Math.sqrt(1-correl*correl) * query.fetch(this.args.random,d,i);
 };

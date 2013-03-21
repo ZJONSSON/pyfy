@@ -34,7 +34,7 @@ function Df(d,val) {
 
 Df.prototype = new Dcf();
 
-Df.prototype.fn = function(query,d) {
+Df.prototype.fn = function(query,d,i) {
   var dates = query.dates(this);
   var pos = pyfy.util.bisect(dates,d);
   var last =dates[pos-1];
@@ -42,6 +42,6 @@ Df.prototype.fn = function(query,d) {
 
   var dcf = this.parent.daycount(pyfy.util.dateParts(last),pyfy.util.dateParts(d));
 
-  return query.fetch(this,last) * Math.exp(-query.fetch(this.args.parent,d)*dcf);
+  return query.fetch(this,last,i) * Math.exp(-query.fetch(this.args.parent,d,i)*dcf);
 };  
 

@@ -44,7 +44,6 @@ Query.prototype.getCache = function(obj) {
 
 Query.prototype.dates = function(obj) {
   var cache = this.getCache(obj);
-  if (!cache) return [];
   if (!cache.dates) {
     var rawDates = this.rawDates(obj),
         dates = cache.dates = [];

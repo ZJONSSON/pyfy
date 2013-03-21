@@ -11,6 +11,6 @@ function Max(d,max) {
 
 Max.prototype = new Derived();
 
-Max.prototype.fn = function(query,d) {
-  return Math.max(query.fetch(this.args.parent,d),this.args.max) ;
+Max.prototype.fn = function(query,d,i) {
+  return Math.max(query.fetch(this.args.parent,d,i),this.args.max) ;
 };

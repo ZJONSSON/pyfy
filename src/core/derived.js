@@ -12,8 +12,8 @@ function Derived(d) {
 
 Derived.prototype = new Base();
 
-Derived.prototype.fn= function(query,d) {
-  return query.fetch(this.args.parent,d);
+Derived.prototype.fn= function(query,d,i) {
+  return query.fetch(this.args.parent,d,i);
 };
 
 

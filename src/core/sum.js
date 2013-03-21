@@ -10,15 +10,15 @@ function Sum(a,b,c,d,e,f,g,h) {
 
   Array.prototype.slice.call(arguments).map(function(d,i) {
     if (d) this.args[i] = d;
-  },this)
+  },this);
 }
 
 Sum.prototype = new Base();
 
-Sum.prototype.fn = function(query,d) {
+Sum.prototype.fn = function(query,d,i) {
   var sum = 0;
   Object.keys(this.args).forEach(function(key) {
-    sum+=query.fetch(this.args[key],d);
+    sum+=query.fetch(this.args[key],d,i);
   },this);
   return sum;
 };
