@@ -15,7 +15,7 @@ function Base() {
 Base.prototype.arg = function(d,v) {
   this.args[d] = v;
   this.version+=1;
-}
+};
 
 Base.prototype.fn = function() {
   return 0;
