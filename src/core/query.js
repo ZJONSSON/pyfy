@@ -2,19 +2,10 @@
 
 pyfy.Query = Query;
 
-pyfy.query = function(id,query) {
-  query = query || new Query();
-  if (id) {
-    query.cache[id] = query.cache[id] || {values:{}};
-    query.cache[id].values = query.cache[id].values || {};
-  }
-  return query;
-};
-
-function Query() {
+function Query(options) {
   if (!(this instanceof Query))
     return new Query();
-  this.cache = {};
+  this.cache = {options: options};
 }
 
 // Init cache traverses the cache object upwards
