@@ -67,7 +67,7 @@ Query.prototype.rawDates = function(obj,rawDates) {
     },this);
     // Finally we check to see if current object has inherit rawDates to contribute
     // This also gives current object the opportunity to overwrite rawDates so far (i.e. filter)
-    if (obj.rawDates) rawDates = obj.rawDates(rawDates);
+    if (obj.rawDates) rawDates = obj.rawDates(rawDates,this);
   }
   return rawDates;
 };

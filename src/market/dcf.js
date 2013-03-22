@@ -1,4 +1,4 @@
-/*global pyfy,Derived*/
+/*global pyfy,Derived,Operator*/
 pyfy.dcf = Dcf;
 
 function Dcf(parent,daycount) {
