@@ -83,16 +83,7 @@
     return pyfy.calendar.weekday(date) && pyfy.calendar.easter(date, [ +1, -2, -3, +39, 50 ]) && !(m == 5 && d == 17) && !(m === 0 && d == 1) && !(m == 11 && (d == 26 || d == 25)) && !(m == 4 && d == 1) && !(m == 7 && date - pyfy.util.nextWeekday(new Date(y, 7, 1), 1) === 0) && !(m == 3 && date - pyfy.util.nextWeekday(new Date(y, 3, 19), 4) === 0);
   };
   pyfy.Query = Query;
-  pyfy.query = function(id, query) {
-    query = query || new Query();
-    if (id) {
-      query.cache[id] = query.cache[id] || {
-        values: {}
-      };
-      query.cache[id].values = query.cache[id].values || {};
-    }
-    return query;
-  };
+  pyfy.query = Query;
   function Query() {
     if (!(this instanceof Query)) return new Query();
     this.cache = {};
@@ -369,6 +360,7 @@
   Period.prototype.fn = function(query, d, i) {
     return d >= this.args.start && d <= this.args.fin ? query.fetch(this.args.parent, d, i) : 0;
   };
+  Period.prototype.noCache = true;
   pyfy.prev = Prev;
   function Prev(d, start) {
     if (!(this instanceof Prev)) return new Prev(d, start);
