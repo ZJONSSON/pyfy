@@ -134,7 +134,7 @@
       if (obj.args) Object.keys(obj.args).forEach(function(key) {
         rawDates = this.rawDates(obj.args[key], rawDates);
       }, this);
-      if (obj.rawDates) rawDates = obj.rawDates(rawDates);
+      if (obj.rawDates) rawDates = obj.rawDates(rawDates, this);
     }
     return rawDates;
   };
@@ -188,7 +188,7 @@
     return 0;
   };
   Base.prototype.rawDates = undefined;
-  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived ].forEach(function(Fn) {
+  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
     };
@@ -449,31 +449,37 @@
     this.args.calendar = calendar || pyfy.calendar.weekday;
   }
   Calendar.prototype = new Derived();
-  Calendar.prototype.rawDates = function(query) {
-    query = pyfy.query(this.ID, query);
-    var cache = query.cache[this.ID];
-    cache.dateMap = {};
-    cache.rawDates = {};
-    for (var pd in this.args.parent.rawDates(query)) {
-      var date = new Date(+pd), calendar = [].concat(this.args.calendar), i = 0;
-      while (!calendar.every(function(d) {
+  Calendar.prototype.checkDate = function(date) {
+    date = new Date(date);
+    var calendar = [].concat(this.calendar), i = 0;
+    function isHoliday() {
+      return !calendar.every(function(d) {
         var fn = typeof d === "string" ? pyfy.calendar[d] : d;
         return fn(date);
-      }, this)) {
-        date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-        if (i++ > 31) throw "Calendar function always returns false";
-      }
-      date = date.valueOf();
-      cache.rawDates[date] = +date;
+      }, this);
+    }
+    function nextDay() {
+      date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+      if (i++ > 31) throw "Calendar function always returns false";
+    }
+    while (isHoliday()) nextDay();
+    return date.valueOf();
+  };
+  Calendar.prototype.rawDates = function(rawDates, query) {
+    var cache = query.cache[this.ID];
+    rawDates = {};
+    cache.dateMap = {};
+    for (var pd in this.args.parent.rawDates()) {
+      var date = this.checkDate(+pd);
+      rawDates[date] = +date;
       cache.dateMap[date] = +pd;
     }
-    return cache.rawDates;
+    return rawDates;
   };
   Calendar.prototype.fn = function(query, d) {
     var cache = query.cache[this.ID];
     return query.fetch(this.args.parent, cache.dateMap[d] || this.calendar(d));
   };
-  Calendar.prototype.calendar = pyfy.calendar.weekday;
   pyfy.operator = pyfy.Operator = Operator;
   var ops = {
     add: function(a, b) {
@@ -566,6 +572,22 @@
   Dcf.prototype.setDaycount = function(d) {
     this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
     return this;
+  };
+  pyfy.timeDiff = TimeDiff;
+  function TimeDiff(parent, date, daycount) {
+    if (!(this instanceof TimeDiff)) return new TimeDiff(parent, date, daycount);
+    Derived.call(this, parent);
+    this.args.daycount = daycount || pyfy.daycount.d_30_360;
+    this.args.date = date || new Date();
+  }
+  TimeDiff.prototype = new Derived();
+  TimeDiff.prototype.fn = function(query, d) {
+    var date = this.args.date;
+    if (typeof date === "string") {
+      var parentDates = query.dates(this.args.parent);
+      date = new Date(date.slice(0, 1).toUpperCase() === "L" ? parentDates[parentDates.length - 1] : parentDates[0]);
+    }
+    return Math.abs(this.args.daycount(pyfy.util.dateParts(date), pyfy.util.dateParts(new Date(d))));
   };
   pyfy.ir = Ir;
   function Ir(data, options) {
