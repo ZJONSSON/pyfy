@@ -45,6 +45,7 @@ all: \
 	src/market/daycount/d_act_360.js \
 	src/market/daycount/d_act_act.js \
 	src/market/dcf.js \
+	src/market/timediff.js \
 	src/market/ir.js \
 	src/market/bond.js \
 	src/stat/ziggurat.js \
