@@ -180,7 +180,7 @@
     return 0;
   };
   Base.prototype.rawDates = undefined;
-  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff ].forEach(function(Fn) {
+  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff, Call, Put ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
     };
@@ -433,6 +433,26 @@
     if (pos < 1) return this.start;
     if (dates[pos] == d) return query.fetch(this, dates[pos - 1], i) + query.fetch(this.args.parent, d, i);
     return query.fetch(this, dates[pos - 1], i);
+  };
+  pyfy.call = Call;
+  function Call(d, strike) {
+    if (!(this instanceof Call)) return new Call(d);
+    Derived.call(this, d);
+    this.args.strike = strike || 0;
+  }
+  Call.prototype = new Derived();
+  Call.prototype.fn = function(query, d, i) {
+    return Math.max(query.fetch(this.args.parent, d, i) - this.args.strike, 0);
+  };
+  pyfy.call = Put;
+  function Put(d, strike) {
+    if (!(this instanceof Call)) return new Put(d);
+    Derived.call(this, d);
+    this.args.strike = strike || 0;
+  }
+  Put.prototype = new Derived();
+  Put.prototype.fn = function(query, d, i) {
+    return Math.max(this.args.strike - query.fetch(this.args.parent, d, i), 0);
   };
   pyfy.Calendar = Calendar;
   function Calendar(d, calendar) {

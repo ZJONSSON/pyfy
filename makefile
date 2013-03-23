@@ -36,6 +36,8 @@ all: \
 	src/core/deriv/min.js \
 	src/core/deriv/neg.js \
 	src/core/deriv/acct.js \
+	src/core/deriv/call.js \
+	src/core/deriv/put.js \
 	src/core/deriv/calendar.js \
 	src/core/operator.js \
 	src/market/daycount/daycount.js \
