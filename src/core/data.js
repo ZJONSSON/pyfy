@@ -13,10 +13,9 @@ function Data(data,options) {
 Data.prototype = new Base();
 
 Data.prototype.rawDates = function(rawDates,query) {
-  var settle = (query.options && query.options.settle) || new Date();
+  var settle = (query && query.options && query.options.settle) || new Date();
   rawDates = rawDates || {};
   Object.keys(this.args.data).forEach(function(e) {
-    if (typeof e ==="string") e = parseDate(e);
     rawDates[+e] = +e;
   });
   return rawDates;
