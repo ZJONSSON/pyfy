@@ -5,10 +5,10 @@ pyfy.data = pyfy.Data = Data;
 function Data(data,options) {
   if (!(this instanceof Data))
     return new Data(data,options);
- Base.apply(this,arguments);
- this.args.data = {};
- this._dates = [];
- if (data) this.update(data);
+  Base.apply(this,arguments);
+  this.args.data = {};
+  this._dates = [];
+  if (data) this.update(data);
 }
 
 Data.prototype = new Base();

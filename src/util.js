@@ -28,12 +28,12 @@ pyfy.util.nextDay = function(d,i) {
 
 
 pyfy.util.nextWeekday = function(date,weekday) {
-  var currentWeekday = date.getDay()
+  var currentWeekday = date.getDay();
   var dt = (currentWeekday > weekday)
     ? weekday + 7 -currentWeekday
     : weekday - currentWeekday;
   return new Date(date.getFullYear(),date.getMonth(),date.getDate()+dt);
-}
+};
 
 function ascending(a,b) { return +a-b;}
 

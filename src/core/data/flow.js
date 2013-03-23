@@ -4,7 +4,7 @@ pyfy.flow = Flow;
 function Flow(data,options) {
   if (!(this instanceof Flow))
     return new Flow(data,options);
- Data.apply(this,arguments);
+  Data.apply(this,arguments);
 }
 
 Flow.prototype = new Data();
