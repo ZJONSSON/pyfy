@@ -242,14 +242,15 @@
     if (!(this instanceof Data)) return new Data(data, options);
     Base.apply(this, arguments);
     this.args.data = {};
-    this._dates = [];
     if (data) this.update(data);
   }
   Data.prototype = new Base();
-  Data.prototype.rawDates = function(rawDates) {
+  Data.prototype.rawDates = function(rawDates, query) {
+    var settle = query.options && query.options.settle || new Date();
     rawDates = rawDates || {};
-    this._dates.forEach(function(e) {
-      rawDates[e] = e;
+    Object.keys(this.args.data).forEach(function(e) {
+      if (typeof e === "string") e = parseDate(e);
+      rawDates[+e] = +e;
     });
     return rawDates;
   };
@@ -263,14 +264,7 @@
         this.args.data[(d.x || d[0]).valueOf()] = d.y || d[1];
       }, this);
     }
-    this._dates = Object.keys(this.args.data).map(function(key) {
-      return +key;
-    }).sort(ascending);
     return this;
-  };
-  Data.prototype.set = function(a) {
-    this.args.data = {};
-    return this.update(a);
   };
   Data.prototype.fn = function(query, d) {
     if (!Object.keys(this.args.data).length) return 0;
