@@ -1,10 +1,10 @@
 /*global pyfy,ascending*/
 
-pyfy.Query = Query;
+pyfy.query = Query;
 
 function Query(options) {
   if (!(this instanceof Query))
-    return new Query();
+    return new Query(options);
   this.cache = {options: options};
 }
 
@@ -16,9 +16,10 @@ Query.prototype.initCache = function(obj) {
 
   var clear = (!this.cache[obj.ID] || this.cache[obj.ID].version != obj.version);
 
-  if (obj.args) Object.keys(obj.args).forEach(function(key) {
-    var parent = obj.args[key];
-    if (this.initCache(parent)) clear = true;
+  if (obj.args) Object.keys(obj.args)
+    .forEach(function(key) {
+      var parent = obj.args[key];
+      if (this.initCache(parent)) clear = true;
     },this);
 
   if (clear) {
@@ -53,9 +54,10 @@ Query.prototype.rawDates = function(obj,rawDates) {
   rawDates = rawDates || {};
 
   if (cache && !cache.rawDates) {
-    if (obj.args) Object.keys(obj.args).forEach(function(key) {
-      rawDates = this.rawDates(obj.args[key],rawDates);
-    },this);
+    if (obj.args) Object.keys(obj.args)
+      .forEach(function(key) {
+        rawDates = this.rawDates(obj.args[key],rawDates);
+      },this);
     // Finally we check to see if current object has inherit rawDates to contribute
     // This also gives current object the opportunity to overwrite rawDates so far (i.e. filter)
     if (obj.rawDates) rawDates = obj.rawDates(rawDates,this);
