@@ -29,7 +29,7 @@ Data.prototype.update = function(a) {
   } else {
     [].concat(a)
       .forEach(function(d) {
-        this.args.data[d.x.valueOf()] = d.y;
+        this.args.data[(d.x || d[0]).valueOf()] = d.y || d[1];
       },this);
   }
   this._dates = Object.keys(this.args.data)
