@@ -25,7 +25,7 @@ Base.prototype.fn = function() {
 Base.prototype.rawDates = undefined;
 
 // Allow derived object by chaining
-[Cumul,Diff,Prev,Max,Min,Neg,Calendar,Dcf,Period,Derived,TimeDiff,Call,Put].forEach(function(Fn) {
+[Cumul,Diff,Prev,Max,Min,Neg,Calendar,Dcf,Period,Derived,TimeDiff,Call,Put,LogNorm].forEach(function(Fn) {
   Base.prototype[Fn.name.toLowerCase()] = function(a,b,c) {
     return new Fn(this,a,b,c);
   };

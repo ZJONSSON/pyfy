@@ -23,8 +23,9 @@ Simul.prototype.fetch = function(obj,d,i) {
   return values[d][i];
 };
 
-Simul.prototype.get = function(obj) {
-  return [].concat(this.dates(obj))
+Simul.prototype.get = function(obj,dates) {
+  this.initCache(obj);
+  return [].concat(dates || this.dates(obj))
     .map(function(d) {
       var res = [], i = this.num;
       while(i--)
@@ -32,3 +33,4 @@ Simul.prototype.get = function(obj) {
       return res;
     },this);
 };
+
