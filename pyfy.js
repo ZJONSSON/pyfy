@@ -180,7 +180,7 @@
     return 0;
   };
   Base.prototype.rawDates = undefined;
-  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff, Call, Put ].forEach(function(Fn) {
+  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff, Call, Put, LogNorm ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
     };
@@ -803,29 +803,57 @@
   Wiener.prototype.dates = function(query) {
     return query ? query.cache[this.ID].dates.all : [];
   };
-  pyfy.logNorm = function(s, vol, r) {
-    return new Norm(s, vol, r);
-  };
-  function LogNorm(s, r, vol) {
-    if (!(this instanceof LogNorm)) return new LogNorm(s, r, vol);
-    Wiener.apply(this);
-    this.s = s || 0;
-    this.r = r || 0;
-    this.vol = vol || 0;
+  "use strict";
+  pyfy.logNorm = LogNorm;
+  function LogNorm(spot, vol, drift, random) {
+    if (!(this instanceof LogNorm)) return new LogNorm(spot, vol, drift, random);
+    Base.apply(this);
+    this.args.spot = spot;
+    this.args.vol = vol;
+    this.args.drift = drift;
+    this.args.random = random || new Random();
   }
-  LogNorm.prototype = new Wiener();
-  LogNorm.prototype.inputs = function() {
-    return [ this.s, this.r, this.vol ];
-  };
-  LogNorm.prototype.fn = function(query, d) {
-    if (query.cache[this.ID].values.length == 0) {
-      var d0 = new Date();
-      query.cache[this.ID].values[d0] = s;
-      query.fetch(this.parent, d0);
+  LogNorm.prototype = new Base();
+  LogNorm.prototype.fn = function(query, d, i) {
+    var cache = query.cache[this.ID];
+    cache.extent = cache.extent || {};
+    if (!cache.extent[i]) {
+      var spotDates = query.dates(this.args.spot);
+      if (spotDates.length) {
+        cache.extent[i] = {
+          first: spotDates[0],
+          last: spotDates[spotDates.length - 1]
+        };
+      } else {
+        throw "no date information in spot";
+      }
     }
-    return vol * Math.sqrt(dt) * query.fetch(this.parent, d);
-    var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
-    return s * Math.exp(e);
+    var res = query.fetch(this.args.spot, d, i);
+    if (res) return res;
+    var dates = query.dates(this), l = dates.length, datePos = pyfy.util.bisect(cache.dates, d), prev, next, drift, rnd, dt, vol;
+    var pd = d < cache.extent[i].first ? dates[datePos] : d;
+    vol = query.fetch(this.args.vol, pd, i);
+    rnd = query.fetch(this.args.random, pd, i);
+    drift = query.fetch(this.args.drift, pd, i);
+    dt = d < cache.extent[i].first ? dates[datePos] - d : d - dates[datePos - 1];
+    dt = dt / pyfy.util.DAYMS / 365.25;
+    if (d > cache.extent[i].last) {
+      prev = query.fetch(this, dates[datePos - 1], i);
+      if (dates.indexOf(d) === -1) dates.push(d);
+      cache.extent[i].last = d;
+      return prev * Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+    } else if (d < cache.extent[i].first) {
+      next = query.fetch(this, dates[datePos], i);
+      if (dates.indexOf(d) === -1) dates.splice(0, 0, d);
+      cache.extent[i].first = d;
+      return next / Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+    } else {
+      prev = query.fetch(this, dates[datePos - 1], i);
+      next = query.fetch(this, dates[datePos], i);
+      drift = Math.log(next / prev) / ((dates[datePos] - dates[datePos - 1]) / pyfy.util.DAYMS / 365.25);
+      dates.splice(datePos, 0, d);
+      return prev * Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+    }
   };
   function Correl(parent, correl, random) {
     if (!(this instanceof Correl)) return new Correl(parent, correl);
@@ -857,8 +885,9 @@
     }
     return values[d][i];
   };
-  Simul.prototype.get = function(obj) {
-    return [].concat(this.dates(obj)).map(function(d) {
+  Simul.prototype.get = function(obj, dates) {
+    this.initCache(obj);
+    return [].concat(dates || this.dates(obj)).map(function(d) {
       var res = [], i = this.num;
       while (i--) res.push(this.fetch(obj, d.valueOf(), i));
       return res;
