@@ -23,7 +23,7 @@ Query.prototype.initCache = function(obj) {
     },this);
 
   if (clear) {
-    this.cache[obj.ID] = {values:{},version:obj.version};
+    this.cache[obj.ID] = {obj:obj,values:{},version:obj.version};
   }
 
   return clear;
