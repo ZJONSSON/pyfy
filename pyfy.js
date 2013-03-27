@@ -98,6 +98,7 @@
     }, this);
     if (clear) {
       this.cache[obj.ID] = {
+        obj: obj,
         values: {},
         version: obj.version
       };
@@ -734,6 +735,15 @@
   Random.prototype.fn = function() {
     return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
   };
+  Random.prototype.fn = function() {
+    var x, y, r;
+    do {
+      x = Math.random() * 2 - 1;
+      y = Math.random() * 2 - 1;
+      r = x * x + y * y;
+    } while (!r || r > 1);
+    return x * Math.sqrt(-2 * Math.log(r) / r);
+  };
   Random.prototype.correl = function(correl) {
     return pyfy.correl(this, correl);
   };
@@ -817,6 +827,7 @@
   LogNorm.prototype.fn = function(query, d, i) {
     var cache = query.cache[this.ID];
     cache.extent = cache.extent || {};
+    i = i || 0;
     if (!cache.extent[i]) {
       var spotDates = query.dates(this.args.spot);
       if (spotDates.length) {
@@ -839,22 +850,26 @@
     dt = dt / pyfy.util.DAYMS / 365.25;
     if (d > cache.extent[i].last) {
       prev = query.fetch(this, dates[datePos - 1], i);
+      if (i == 0) console.log(prev, drift, vol, dt);
       if (dates.indexOf(d) === -1) dates.push(d);
       cache.extent[i].last = d;
-      return prev * Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+      return prev * pyfy_exp(vol, drift, rnd, dt);
     } else if (d < cache.extent[i].first) {
       next = query.fetch(this, dates[datePos], i);
       if (dates.indexOf(d) === -1) dates.splice(0, 0, d);
       cache.extent[i].first = d;
-      return next / Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+      return next / pyfy_exp(vol, drift, rnd, dt);
     } else {
       prev = query.fetch(this, dates[datePos - 1], i);
       next = query.fetch(this, dates[datePos], i);
       drift = Math.log(next / prev) / ((dates[datePos] - dates[datePos - 1]) / pyfy.util.DAYMS / 365.25);
       dates.splice(datePos, 0, d);
-      return prev * Math.exp((vol * (rnd - 1 / 2) + drift) * dt);
+      return prev * pyfy_exp(vol, drift, rnd, dt);
     }
   };
+  function pyfy_exp(vol, drift, rnd, dt) {
+    return Math.exp((drift - vol * vol / 2) * dt + rnd * vol * Math.sqrt(dt));
+  }
   function Correl(parent, correl, random) {
     if (!(this instanceof Correl)) return new Correl(parent, correl);
     Random.call(this);

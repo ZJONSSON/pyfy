@@ -9,8 +9,15 @@ pyfy.random = Random;
 
 Random.prototype = new Base();
 
+// Normal random generator from d3.js (C) Mike Bostock
 Random.prototype.fn = function() {
-  return (Math.random()*2-1)+(Math.random()*2-1)+(Math.random()*2-1);
+  var x, y, r;
+  do {
+    x = Math.random() * 2 - 1;
+    y = Math.random() * 2 - 1;
+    r = x * x + y * y;
+  } while (!r || r > 1);
+  return x * Math.sqrt(-2 * Math.log(r) / r);
 };
 
 Random.prototype.correl = function(correl) {
@@ -19,4 +26,4 @@ Random.prototype.correl = function(correl) {
 
 Random.prototype.wiener = function() {
   return pyfy.wiener(this);
-}
+};
