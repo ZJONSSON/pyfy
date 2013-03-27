@@ -733,9 +733,6 @@
   pyfy.random = Random;
   Random.prototype = new Base();
   Random.prototype.fn = function() {
-    return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
-  };
-  Random.prototype.fn = function() {
     var x, y, r;
     do {
       x = Math.random() * 2 - 1;
@@ -826,12 +823,11 @@
   LogNorm.prototype = new Base();
   LogNorm.prototype.fn = function(query, d, i) {
     var cache = query.cache[this.ID];
-    cache.extent = cache.extent || {};
     i = i || 0;
-    if (!cache.extent[i]) {
+    if (!cache.extent) {
       var spotDates = query.dates(this.args.spot);
       if (spotDates.length) {
-        cache.extent[i] = {
+        cache.extent = {
           first: spotDates[0],
           last: spotDates[spotDates.length - 1]
         };
@@ -842,28 +838,32 @@
     var res = query.fetch(this.args.spot, d, i);
     if (res) return res;
     var dates = query.dates(this), l = dates.length, datePos = pyfy.util.bisect(cache.dates, d), prev, next, drift, rnd, dt, vol;
-    var pd = d < cache.extent[i].first ? dates[datePos] : d;
+    var pd = d < cache.extent.first ? dates[datePos] : d;
     vol = query.fetch(this.args.vol, pd, i);
     rnd = query.fetch(this.args.random, pd, i);
     drift = query.fetch(this.args.drift, pd, i);
-    dt = d < cache.extent[i].first ? dates[datePos] - d : d - dates[datePos - 1];
+    dt = d < cache.extent.first ? dates[datePos] - d : d - dates[datePos - 1];
     dt = dt / pyfy.util.DAYMS / 365.25;
-    if (d > cache.extent[i].last) {
+    if (d > cache.extent.last) {
       prev = query.fetch(this, dates[datePos - 1], i);
-      if (i == 0) console.log(prev, drift, vol, dt);
-      if (dates.indexOf(d) === -1) dates.push(d);
-      cache.extent[i].last = d;
+      if (!i) {
+        dates.push(d);
+        cache.extent.last = d;
+      }
       return prev * pyfy_exp(vol, drift, rnd, dt);
-    } else if (d < cache.extent[i].first) {
+    } else if (d < cache.extent.first) {
       next = query.fetch(this, dates[datePos], i);
-      if (dates.indexOf(d) === -1) dates.splice(0, 0, d);
-      cache.extent[i].first = d;
+      if (!i) {
+        dates.splice(0, 0, d);
+        cache.extent.first = d;
+      }
+      console.log(next, vol, drift, rnd, dt);
       return next / pyfy_exp(vol, drift, rnd, dt);
     } else {
       prev = query.fetch(this, dates[datePos - 1], i);
       next = query.fetch(this, dates[datePos], i);
       drift = Math.log(next / prev) / ((dates[datePos] - dates[datePos - 1]) / pyfy.util.DAYMS / 365.25);
-      dates.splice(datePos, 0, d);
+      if (!i) dates.splice(datePos, 0, d);
       return prev * pyfy_exp(vol, drift, rnd, dt);
     }
   };
