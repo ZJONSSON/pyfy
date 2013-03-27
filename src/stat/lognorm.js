@@ -19,6 +19,7 @@ LogNorm.prototype = new Base();
 LogNorm.prototype.fn = function(query,d,i) {
   var cache = query.cache[this.ID];
   cache.extent = cache.extent || {};
+  i=i||0;
 
   if (!cache.extent[i]) {
     var spotDates = query.dates(this.args.spot);
@@ -49,20 +50,23 @@ LogNorm.prototype.fn = function(query,d,i) {
     prev = query.fetch(this,dates[datePos-1],i);
     if (dates.indexOf(d) === -1) dates.push(d);
     cache.extent[i].last = d;
-    return prev * Math.exp((vol*(rnd-1/2)+drift)*dt);
+    return prev * pyfy_exp(vol,drift,rnd,dt);
   } else if (d < cache.extent[i].first) {
     next = query.fetch(this,dates[datePos],i);
     if (dates.indexOf(d) === -1) dates.splice(0,0,d);
     cache.extent[i].first = d;
     // go back in time
-    return next / Math.exp((vol*(rnd-1/2)+drift)*dt);
+    return next / pyfy_exp(vol,drift,rnd,dt);
   } else {
     prev = query.fetch(this,dates[datePos-1],i);
     next = query.fetch(this,dates[datePos],i);
     // Brownian bridge - drift solely determined by surrounding points
     drift = Math.log(next/prev) / ((dates[datePos]-dates[datePos-1])/pyfy.util.DAYMS / 365.25)  ;
     dates.splice(datePos,0,d);
-    return prev * Math.exp((vol*(rnd-1/2)+drift)*dt);
+    return prev * pyfy_exp(vol,drift,rnd,dt);
   }
 };
 
+function pyfy_exp(vol,drift,rnd,dt) {
+  return Math.exp((drift-vol*vol/2)*dt+rnd*vol*Math.sqrt(dt));
+};
