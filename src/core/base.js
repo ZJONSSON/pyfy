@@ -12,9 +12,11 @@ function Base() {
   this.version = 0;
 }
 
-Base.prototype.arg = function(d,v) {
+Base.prototype.set = function(d,v) {
+  if (arguments.length ==1 ) return this.args[d];
   this.args[d] = v;
   this.version+=1;
+  return this;
 };
 
 Base.prototype.fn = function() {

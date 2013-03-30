@@ -173,9 +173,11 @@
     this.args = {};
     this.version = 0;
   }
-  Base.prototype.arg = function(d, v) {
+  Base.prototype.set = function(d, v) {
+    if (arguments.length == 1) return this.args[d];
     this.args[d] = v;
     this.version += 1;
+    return this;
   };
   Base.prototype.fn = function() {
     return 0;
@@ -857,7 +859,6 @@
         dates.splice(0, 0, d);
         cache.extent.first = d;
       }
-      console.log(next, vol, drift, rnd, dt);
       return next / pyfy_exp(vol, drift, rnd, dt);
     } else {
       prev = query.fetch(this, dates[datePos - 1], i);
