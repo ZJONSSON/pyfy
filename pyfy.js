@@ -161,7 +161,7 @@
     var values = this.cache[obj.ID].values;
     if (values[d] === undefined) {
       var fn = obj.fn(this, d.valueOf());
-      if (fn !== undefined) values[d] = fn;
+      if (fn !== undefined && obj.cache) values[d] = fn;
     }
     return values[d];
   };
@@ -172,11 +172,17 @@
     this.ID = ID++;
     this.args = {};
     this.version = 0;
+    this.cache = true;
   }
   Base.prototype.set = function(d, v) {
     if (arguments.length == 1) return this.args[d];
     this.args[d] = v;
     this.version += 1;
+    return this;
+  };
+  Base.prototype.useCache = function(d) {
+    if (!arguments.length) return this.cache;
+    this.cache = d;
     return this;
   };
   Base.prototype.fn = function() {

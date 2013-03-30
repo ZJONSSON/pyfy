@@ -76,7 +76,7 @@ Query.prototype.x = function(obj) {
 Query.prototype.val = function(obj,dates) {
   dates = dates || this.dates(obj);
   dates = [].concat(dates);
-   return this.get(obj,dates).map(function(d,i) {
+  return this.get(obj,dates).map(function(d,i) {
     return {x:new Date(dates[i]),y:d};
   },this);
 };
@@ -95,7 +95,7 @@ Query.prototype.fetch = function(obj,d) {
 
   if (values[d] === undefined) {
     var fn = obj.fn(this,d.valueOf());
-    if (fn !== undefined) values[d] = fn;
+    if (fn !== undefined && obj.cache) values[d] = fn;
   }
   return values[d];
 };

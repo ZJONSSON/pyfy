@@ -10,12 +10,19 @@ function Base() {
   this.ID = ID++;
   this.args = {};
   this.version = 0;
+  this.cache = true;
 }
 
 Base.prototype.set = function(d,v) {
   if (arguments.length ==1 ) return this.args[d];
   this.args[d] = v;
   this.version+=1;
+  return this;
+};
+
+Base.prototype.useCache = function(d) {
+  if (!arguments.length) return this.cache;
+  this.cache = d;
   return this;
 };
 
