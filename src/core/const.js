@@ -14,8 +14,3 @@ Const.prototype = new Base();
 Const.prototype.fn = function() {
   return this.args.const;
 };
-
-Const.prototype.update = Const.prototype.set = function(d) {
-  this.args.const = d;
-  return this;
-};

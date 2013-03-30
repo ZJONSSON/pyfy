@@ -220,10 +220,6 @@
   Const.prototype.fn = function() {
     return this.args.const;
   };
-  Const.prototype.update = Const.prototype.set = function(d) {
-    this.args.const = d;
-    return this;
-  };
   pyfy.sum = Sum;
   function Sum(a, b, c, d, e, f, g, h) {
     if (!(this instanceof Sum)) return new Sum(a, b, c, d, e, f, g, h);
