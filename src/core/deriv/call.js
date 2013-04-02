@@ -1,15 +1,15 @@
-/*global pyfy,Derived*/
 
 pyfy.call = Call;
 
-function Call(d,strike) {
+function Call(parent,strike) {
 	if (!(this instanceof Call))
-    return new Call(d);
-  Derived.call(this,d);
+    return new Call(parent);
+  Base.call(this);
+  this.args.parent = parent;
   this.args.strike = strike || 0;
 }
 
-Call.prototype = new Derived();
+Call.prototype = new Base();
 
 Call.prototype.fn = function(query,d,i) {
   return Math.max(query.fetch(this.args.parent,d,i)-this.args.strike,0) ;

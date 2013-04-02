@@ -16,7 +16,7 @@ suite.addBatch({
   "with data" : {
     topic : parent.diff(),
      "has derived as prototype" : function(_) {
-      assert.isTrue(pyfy.Derived.prototype.isPrototypeOf(_));
+      assert.isTrue(pyfy.Base.prototype.isPrototypeOf(_));
     },
     "returns differences" : function(_) {
       assert.deepEqual(_.y(),[0,20,-130]);

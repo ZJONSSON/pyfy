@@ -2,15 +2,16 @@
 
 pyfy.period = Period;
 
-function Period(d,start,fin) {
+function Period(parent,start,fin) {
   if (!(this instanceof Period))
-    return new Period(d,start,fin);
-  Derived.call(this,d);
+    return new Period(parent,start,fin);
+  Base.call(this);
+  this.args.parent = parent;
   this.args.start = start || -Infinity;
   this.args.fin = fin || Infinity;
 }
 
-Period.prototype = new Derived();
+Period.prototype = new Base();
 
 Period.prototype.rawDates = function(rawDates) {
   var res = {};

@@ -5,15 +5,16 @@ pyfy.Calendar = Calendar;
 function Calendar(d,calendar) {
   if (!(this instanceof Calendar))
     return new Calendar(d,calendar);
-  Derived.call(this,d);
+  Base.call(this);
+  this.args.parent = d;
   this.args.calendar = calendar || pyfy.calendar.weekday;
 }
 
-Calendar.prototype = new Derived();
+Calendar.prototype = new Base();
 
 Calendar.prototype.checkDate = function(date) {
   date = new Date(date);
-  var calendar = [].concat(this.calendar),
+  var calendar = [].concat(this.args.calendar),
       i=0;
 
   // Every calendar function must return true, otherwise we go to the next day

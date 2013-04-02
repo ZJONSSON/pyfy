@@ -4,7 +4,7 @@ pyfy.acct = Acct;
 
 function Acct(parent,start) {
   if (!(this instanceof Acct))
-    return new Acct(parent,start);
+    return new Base();
   Base.call(this);
   this.args.parent = parent;
   this.args.start = d || 0;

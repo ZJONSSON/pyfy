@@ -18,7 +18,7 @@ hff = function(issue,maturity,interest,ocpi) {
   hff.prev = hff.bal.prev();
   hff.i = per.mul(hff.prev).mul(interest/2)
   hff.p = hff.sub(hff.i).neg();
-  hff.bal.setParent(hff.p)
+  hff.bal.set("parent",hff.p)
   return hff;
 }
 

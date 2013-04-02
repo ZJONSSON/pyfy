@@ -2,13 +2,14 @@
 
 pyfy.diff = Diff;
 
-function Diff(d) {
+function Diff(parent) {
   if (!(this instanceof Diff))
-    return new Diff();
-  Derived.call(this,d);
+    return new Diff(parent);
+  Base.call(this);
+  this.args.parent = parent;
 }
 
-Diff.prototype = new Derived();
+Diff.prototype = new Base();
 
 Diff.prototype.fn = function(query,d,i) {
   var dates = query.dates(this),

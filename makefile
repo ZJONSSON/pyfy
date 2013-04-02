@@ -27,7 +27,6 @@ all: \
 	src/core/data/price.js \
 	src/core/data/stream.js \
 	src/core/data/interval.js \
-	src/core/derived.js \
 	src/core/deriv/period.js \
 	src/core/deriv/prev.js \
 	src/core/deriv/cumul.js \

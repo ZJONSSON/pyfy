@@ -4,11 +4,12 @@ pyfy.dcf = Dcf;
 function Dcf(parent,daycount) {
   if (!(this instanceof Dcf))
     return new Operator(parent,daycount);
-  Derived.call(this,parent);
+  Base.call(this,parent);
+  this.args.parent = parent;
   if (daycount !== undefined) this.setDaycount(daycount);
 }
 
-Dcf.prototype = new Derived();
+Dcf.prototype = new Base();
 
 Dcf.prototype.fn = function(query,d) {
   var cache = query.cache[this.ID];

@@ -27,12 +27,13 @@ pyfy.df = function(d) {
   return new Derived(d);
 };
 
-function Df(d,val) {
-  Derived.call(this,d);
+function Df(parent,val) {
+  Base.call(this,d);
+  this.args.parent = parent;
   this.args.val = val;
 }
 
-Df.prototype = new Dcf();
+Df.prototype = new Base();
 
 Df.prototype.fn = function(query,d,i) {
   var dates = query.dates(this);

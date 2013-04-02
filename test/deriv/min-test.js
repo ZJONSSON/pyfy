@@ -16,7 +16,7 @@ suite.addBatch({
   "with data" : {
     topic : parent.min(105),
      "has derived as prototype" : function(_) {
-      assert.isTrue(pyfy.Derived.prototype.isPrototypeOf(_));
+      assert.isTrue(pyfy.Base.prototype.isPrototypeOf(_));
     },
     "returns maximum value" : function(_) {
       assert.deepEqual(_.y(),[100,105,-10]);

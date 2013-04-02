@@ -4,12 +4,13 @@ pyfy.timeDiff = TimeDiff;
 function TimeDiff(parent,date,daycount) {
   if (!(this instanceof TimeDiff))
     return new TimeDiff(parent,date,daycount);
-  Derived.call(this,parent);
+  Base.call(this,parent);
+  this.args.parent = parent;
   this.args.daycount = daycount || pyfy.daycount.d_30_360;
   this.args.date = date || new Date();
 }
 
-TimeDiff.prototype = new Derived();
+TimeDiff.prototype = new Base();
 
 TimeDiff.prototype.fn = function(query,d) {
   var date = this.args.date;
