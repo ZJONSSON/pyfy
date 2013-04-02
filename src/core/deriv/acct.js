@@ -2,14 +2,15 @@
 
 pyfy.acct = Acct;
 
-function Acct(d) {
+function Acct(parent,start) {
   if (!(this instanceof Acct))
-    return new Acct(d);
-  Derived.call(this,d);
+    return new Acct(parent,start);
+  Base.call(this);
+  this.args.parent = parent;
   this.args.start = d || 0;
 }
 
-Acct.prototype = new Derived();
+Acct.prototype = new Base();
 
 Acct.prototype.fn = function(query,d,i) {
   var dates = query.dates(this.args.parent),
