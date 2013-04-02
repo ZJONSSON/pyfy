@@ -8,7 +8,7 @@ var suite = vows.describe("min");
 
 suite.addBatch({
   "no data" : {
-    topic : pyfy.base().min(),
+    topic : pyfy.base().min(0),
     "returns empty array" : function(_) {
       assert.deepEqual(_.y(),[]);
     }

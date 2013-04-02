@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
 
-pyfy.min = Min;
+pyfy.min = function(parent,min) {
+  return new Min()
+    .set("parent",parent)
+    .set("min",min);
+};
 
-function Min(parent,min) {
-  if (!(this instanceof Min))
-    return new Min(parent,min);
+function Min() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.min = min || 0;
 }
 
 Min.prototype = new Base();

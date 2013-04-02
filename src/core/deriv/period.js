@@ -1,14 +1,14 @@
 /*global pyfy,Derived*/
 
-pyfy.period = Period;
+pyfy.period = function(parent,start,finish) {
+  return new Period()
+    .set("parent",parent)
+    .set("start",start || -Infinity)
+    .set("finish",finish || Infinity);
+};
 
-function Period(parent,start,fin) {
-  if (!(this instanceof Period))
-    return new Period(parent,start,fin);
+function Period() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.start = start || -Infinity;
-  this.args.fin = fin || Infinity;
 }
 
 Period.prototype = new Base();
@@ -18,11 +18,11 @@ Period.prototype.rawDates = function(rawDates) {
   if (rawDates)
     Object.keys(rawDates).forEach(function(key) {
       var d = rawDates[key];
-      if (d>= this.args.start && d <= this.args.fin) res[d] = d;
+      if (d>= this.args.start && d <= this.args.finish) res[d] = d;
     },this);
   return res;
 };
 
 Period.prototype.fn = function(query,d,i) {
-  return (d >= this.args.start && d<= this.args.fin) ? query.fetch(this.args.parent,d,i) : 0;
+  return (d >= this.args.start && d<= this.args.finish) ? query.fetch(this.args.parent,d,i) : 0;
 };

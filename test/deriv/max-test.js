@@ -8,7 +8,7 @@ var suite = vows.describe("max");
 
 suite.addBatch({
   "no data" : {
-    topic : pyfy.base().max(),
+    topic : pyfy.base().max(0),
     "returns empty array" : function(_) {
       assert.deepEqual(_.y(),[]);
     }

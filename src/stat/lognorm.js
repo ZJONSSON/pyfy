@@ -1,17 +1,16 @@
 /*global pyfy,Base,Random*/
 "use strict";
-pyfy.logNorm = LogNorm;
+pyfy.logNorm = function(spot,vol,drift,random) {
+  return new Base()
+    .set("spot",spot)
+    .set("vol",vol)
+    .set("drift",drift)
+    .set("random", random || new Random());
+};
 
 
-function LogNorm(spot,vol,drift,random) {
-  if (!(this instanceof LogNorm))
-    return new LogNorm(spot,vol,drift,random);
-
+function LogNorm() {
   Base.apply(this);
-  this.args.spot = spot;
-  this.args.vol = vol;
-  this.args.drift = drift;
-  this.args.random = random || new Random();
 }
 
 LogNorm.prototype = new Base();

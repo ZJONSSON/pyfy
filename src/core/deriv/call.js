@@ -1,12 +1,12 @@
 
-pyfy.call = Call;
+pyfy.call = function(parent,strike) {
+  return new Call()
+    .set("parent",parent)
+    .set("strike",strike);
+};
 
-function Call(parent,strike) {
-	if (!(this instanceof Call))
-    return new Call(parent);
+function Call() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.strike = strike || 0;
 }
 
 Call.prototype = new Base();

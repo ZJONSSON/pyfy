@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
-pyfy.timeDiff = TimeDiff;
+pyfy.timeDiff = function(parent,date,daycount) {
+  return new TimeDiff()
+    .set("parent",parent)
+    .set("daycount",daycount || pyfy.daycount.d_30_360)
+    .set("date", date || new Date());
+};
 
-function TimeDiff(parent,date,daycount) {
-  if (!(this instanceof TimeDiff))
-    return new TimeDiff(parent,date,daycount);
+function TimeDiff() {
   Base.call(this,parent);
-  this.args.parent = parent;
-  this.args.daycount = daycount || pyfy.daycount.d_30_360;
-  this.args.date = date || new Date();
 }
 
 TimeDiff.prototype = new Base();

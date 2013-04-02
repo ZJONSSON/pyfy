@@ -189,9 +189,9 @@
     return 0;
   };
   Base.prototype.rawDates = undefined;
-  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, TimeDiff, Call, Put, LogNorm ].forEach(function(Fn) {
-    Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
-      return new Fn(this, a, b, c);
+  [ "cumul", "diff", "prev", "max", "min", "neg", "calendar", "dcf", "period", "timeDiff", "call", "put", "logNorm" ].forEach(function(fn) {
+    Base.prototype[fn] = function(a, b, c) {
+      return pyfy[fn](this, a, b, c);
     };
   });
   Base.prototype.pv = function(curve) {
@@ -216,11 +216,11 @@
       return new Date(d);
     });
   };
-  pyfy.const = Const;
-  function Const(data, options) {
-    if (!(this instanceof Const)) return new Const(data, options);
-    Base.call(this);
-    this.args.const = data || 0;
+  pyfy.const = function(value) {
+    return new Const().set("const", value || 0);
+  };
+  function Const() {
+    Base.apply(this);
   }
   Const.prototype = new Base();
   Const.prototype.fn = function() {
@@ -327,134 +327,125 @@
     }
     return pyfy.flow(interval);
   };
-  pyfy.period = Period;
-  function Period(parent, start, fin) {
-    if (!(this instanceof Period)) return new Period(parent, start, fin);
+  pyfy.period = function(parent, start, finish) {
+    return new Period().set("parent", parent).set("start", start || -Infinity).set("finish", finish || Infinity);
+  };
+  function Period() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.start = start || -Infinity;
-    this.args.fin = fin || Infinity;
   }
   Period.prototype = new Base();
   Period.prototype.rawDates = function(rawDates) {
     var res = {};
     if (rawDates) Object.keys(rawDates).forEach(function(key) {
       var d = rawDates[key];
-      if (d >= this.args.start && d <= this.args.fin) res[d] = d;
+      if (d >= this.args.start && d <= this.args.finish) res[d] = d;
     }, this);
     return res;
   };
   Period.prototype.fn = function(query, d, i) {
-    return d >= this.args.start && d <= this.args.fin ? query.fetch(this.args.parent, d, i) : 0;
+    return d >= this.args.start && d <= this.args.finish ? query.fetch(this.args.parent, d, i) : 0;
   };
-  pyfy.prev = Prev;
-  function Prev(parent, start) {
-    if (!(this instanceof Prev)) return new Prev(parent, start);
+  pyfy.prev = function(parent, start) {
+    return new Prev().set("parent", parent).set("start", start || 0);
+  };
+  function Prev() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.start = start || 0;
   }
   Prev.prototype = new Base();
   Prev.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return datePos > 0 ? query.fetch(this.args.parent, dates[datePos - 1], i) : this.args.start;
   };
-  pyfy.cumul = Cumul;
-  function Cumul(parent) {
-    if (!(this instanceof Cumul)) return new Base(parent);
+  pyfy.cumul = function(parent) {
+    return new Cumul().set("parent", parent);
+  };
+  function Cumul() {
     Base.call(this);
-    this.args.parent = parent;
   }
   Cumul.prototype = new Base();
   Cumul.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return query.fetch(this.args.parent, d, i) + (datePos ? query.fetch(this, dates[datePos - 1], i) : 0);
   };
-  pyfy.diff = Diff;
-  function Diff(parent) {
-    if (!(this instanceof Diff)) return new Diff(parent);
+  pyfy.diff = function(parent) {
+    return new Diff().set("parent", parent);
+  };
+  function Diff() {
     Base.call(this);
-    this.args.parent = parent;
   }
   Diff.prototype = new Base();
   Diff.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
     return datePos ? query.fetch(this.args.parent, d, i) - query.fetch(this.args.parent, dates[datePos - 1], i) : 0;
   };
-  pyfy.max = Max;
-  function Max(parent, max) {
-    if (!(this instanceof Max)) return new Max(parent, max);
+  pyfy.max = function(parent, max) {
+    return new Max().set("parent", parent).set("max", max);
+  };
+  function Max() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.max = max || 0;
   }
   Max.prototype = new Base();
   Max.prototype.fn = function(query, d, i) {
     return Math.max(query.fetch(this.args.parent, d, i), this.args.max);
   };
-  pyfy.min = Min;
-  function Min(parent, min) {
-    if (!(this instanceof Min)) return new Min(parent, min);
+  pyfy.min = function(parent, min) {
+    return new Min().set("parent", parent).set("min", min);
+  };
+  function Min() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.min = min || 0;
   }
   Min.prototype = new Base();
   Min.prototype.fn = function(query, d, i) {
     return Math.min(query.fetch(this.args.parent, d, i), this.args.min);
   };
-  pyfy.Neg = Neg;
-  function Neg(parent) {
-    if (!(this instanceof Neg)) return new Neg(parent);
+  pyfy.neg = function(parent) {
+    return new Neg().set("parent", parent);
+  };
+  function Neg() {
     Base.call(this);
-    this.args.parent = parent;
   }
   Neg.prototype = new Base();
   Neg.prototype.fn = function(query, d, i) {
     return -query.fetch(this.args.parent, d, i);
   };
-  pyfy.acct = Acct;
-  function Acct(parent, start) {
-    if (!(this instanceof Acct)) return new Base();
+  pyfy.acct = function(parent, start) {
+    return new Acct().set("parent", parent).set("start", start || 0);
+  };
+  function Acct() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.start = d || 0;
   }
   Acct.prototype = new Base();
   Acct.prototype.fn = function(query, d, i) {
     var dates = query.dates(this.args.parent), pos = pyfy.util.bisect(dates, d);
-    if (pos < 1) return this.start;
+    if (pos < 1) return this.args.start;
     if (dates[pos] == d) return query.fetch(this, dates[pos - 1], i) + query.fetch(this.args.parent, d, i);
     return query.fetch(this, dates[pos - 1], i);
   };
-  pyfy.call = Call;
-  function Call(parent, strike) {
-    if (!(this instanceof Call)) return new Call(parent);
+  pyfy.call = function(parent, strike) {
+    return new Call().set("parent", parent).set("strike", strike);
+  };
+  function Call() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.strike = strike || 0;
   }
   Call.prototype = new Base();
   Call.prototype.fn = function(query, d, i) {
     return Math.max(query.fetch(this.args.parent, d, i) - this.args.strike, 0);
   };
-  pyfy.call = Put;
-  function Put(parent, strike) {
-    if (!(this instanceof Put)) return new Put(parent);
+  pyfy.put = function(parent, strike) {
+    return new Put().set("parent", parent).set("strike", strike || 0);
+  };
+  function Put() {
     Base.call(this);
-    this.args.parent = parent;
-    this.args.strike = strike || 0;
   }
   Put.prototype = new Base();
   Put.prototype.fn = function(query, d, i) {
     return Math.max(this.args.strike - query.fetch(this.args.parent, d, i), 0);
   };
-  pyfy.Calendar = Calendar;
-  function Calendar(d, calendar) {
-    if (!(this instanceof Calendar)) return new Calendar(d, calendar);
+  pyfy.Calendar = function(parent, calendar) {
+    return new Calendar().set("parent", parent).set("calendar", calendar || pyfy.calendar.weekday);
+  };
+  function Calendar() {
     Base.call(this);
-    this.args.parent = d;
-    this.args.calendar = calendar || pyfy.calendar.weekday;
   }
   Calendar.prototype = new Base();
   Calendar.prototype.checkDate = function(date) {
@@ -557,38 +548,31 @@
     }
     return dct;
   };
-  pyfy.dcf = Dcf;
-  function Dcf(parent, daycount) {
-    if (!(this instanceof Dcf)) return new Operator(parent, daycount);
-    Base.call(this, parent);
-    this.args.parent = parent;
-    if (daycount !== undefined) this.setDaycount(daycount);
+  pyfy.dcf = function(parent, daycount) {
+    return new Dcf().set("parent", parent).set("daycount", daycount || pyfy.daycount.d_30_360);
+  };
+  function Dcf() {
+    Base.call(this);
   }
   Dcf.prototype = new Base();
   Dcf.prototype.fn = function(query, d) {
+    if (typeof this.args.daycount === "string") this.args.daycount = pyfy.daycount[this.args.daycount];
     var cache = query.cache[this.ID];
     if (!Object.keys(cache.values).length) {
       var dates = query.dates(this);
       cache.values = {};
       dates.slice(1).forEach(function(d, i) {
         var d1 = pyfy.util.dateParts(dates[i]), d2 = pyfy.util.dateParts(d);
-        cache.values[d] = dates[i] ? this.daycount(d1, d2) : 0;
+        cache.values[d] = dates[i] ? this.args.daycount(d1, d2) : 0;
       }, this);
     }
     return cache.values[d] || 0;
   };
-  Dcf.prototype.daycount = pyfy.daycount.d_30_360;
-  Dcf.prototype.setDaycount = function(d) {
-    this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
-    return this;
+  pyfy.timeDiff = function(parent, date, daycount) {
+    return new TimeDiff().set("parent", parent).set("daycount", daycount || pyfy.daycount.d_30_360).set("date", date || new Date());
   };
-  pyfy.timeDiff = TimeDiff;
-  function TimeDiff(parent, date, daycount) {
-    if (!(this instanceof TimeDiff)) return new TimeDiff(parent, date, daycount);
+  function TimeDiff() {
     Base.call(this, parent);
-    this.args.parent = parent;
-    this.args.daycount = daycount || pyfy.daycount.d_30_360;
-    this.args.date = date || new Date();
   }
   TimeDiff.prototype = new Base();
   TimeDiff.prototype.fn = function(query, d) {
@@ -599,9 +583,10 @@
     }
     return Math.abs(this.args.daycount(pyfy.util.dateParts(date), pyfy.util.dateParts(new Date(d))));
   };
-  pyfy.ir = Ir;
-  function Ir(data, options) {
-    if (!(this instanceof Ir)) return new Ir(data, options);
+  pyfy.ir = function(data, options) {
+    return new Ir().set("data", data).set("options", options);
+  };
+  function Ir() {
     Stock.apply(this, arguments);
     this.df = new Df(this);
     this.args.daycount = pyfy.daycount.d_30_360;
@@ -618,7 +603,7 @@
     return new Derived(d);
   };
   function Df(parent, val) {
-    Base.call(this, d);
+    Base.call(this);
     this.args.parent = parent;
     this.args.val = val;
   }
@@ -816,14 +801,11 @@
     return query ? query.cache[this.ID].dates.all : [];
   };
   "use strict";
-  pyfy.logNorm = LogNorm;
-  function LogNorm(spot, vol, drift, random) {
-    if (!(this instanceof LogNorm)) return new LogNorm(spot, vol, drift, random);
+  pyfy.logNorm = function(spot, vol, drift, random) {
+    return new Base().set("spot", spot).set("vol", vol).set("drift", drift).set("random", random || new Random());
+  };
+  function LogNorm() {
     Base.apply(this);
-    this.args.spot = spot;
-    this.args.vol = vol;
-    this.args.drift = drift;
-    this.args.random = random || new Random();
   }
   LogNorm.prototype = new Base();
   LogNorm.prototype.fn = function(query, d, i) {

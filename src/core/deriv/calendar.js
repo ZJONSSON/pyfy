@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
 
-pyfy.Calendar = Calendar;
+pyfy.Calendar = function(parent,calendar) {
+  return new Calendar()
+    .set("parent",parent)
+    .set("calendar",calendar || pyfy.calendar.weekday);
+};
 
-function Calendar(d,calendar) {
-  if (!(this instanceof Calendar))
-    return new Calendar(d,calendar);
+function Calendar() {
   Base.call(this);
-  this.args.parent = d;
-  this.args.calendar = calendar || pyfy.calendar.weekday;
 }
 
 Calendar.prototype = new Base();

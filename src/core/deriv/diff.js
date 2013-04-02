@@ -1,12 +1,12 @@
 /*global pyfy,Derived*/
 
-pyfy.diff = Diff;
+pyfy.diff = function(parent) {
+  return new Diff()
+    .set("parent",parent);
+};
 
-function Diff(parent) {
-  if (!(this instanceof Diff))
-    return new Diff(parent);
+function Diff() {
   Base.call(this);
-  this.args.parent = parent;
 }
 
 Diff.prototype = new Base();

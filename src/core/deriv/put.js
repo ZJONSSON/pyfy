@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
 
-pyfy.call = Put;
+pyfy.put = function(parent,strike) {
+  return new Put()
+    .set("parent",parent)
+    .set("strike",strike || 0);
+};
 
-function Put(parent,strike) {
-	if (!(this instanceof Put))
-    return new Put(parent);
+function Put() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.strike = strike || 0;
 }
 
 Put.prototype = new Base();

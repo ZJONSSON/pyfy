@@ -1,11 +1,12 @@
 /*global pyfy,Base,Stock,Derived,Dcf*/
 
-pyfy.ir = Ir;
+pyfy.ir = function(data,options) {
+  return new Ir()
+    .set("data",data)
+    .set("options",options);
+};
 
-function Ir(data,options) {
-  if (!(this instanceof Ir))
-    return new Ir(data,options);
-
+function Ir() {
   Stock.apply(this,arguments);
   this.df = new Df(this);
   this.args.daycount = pyfy.daycount.d_30_360;
@@ -28,7 +29,7 @@ pyfy.df = function(d) {
 };
 
 function Df(parent,val) {
-  Base.call(this,d);
+  Base.call(this);
   this.args.parent = parent;
   this.args.val = val;
 }
@@ -44,5 +45,5 @@ Df.prototype.fn = function(query,d,i) {
   var dcf = this.parent.daycount(pyfy.util.dateParts(last),pyfy.util.dateParts(d));
 
   return query.fetch(this,last,i) * Math.exp(-query.fetch(this.args.parent,d,i)*dcf);
-};  
+}; 
 

@@ -1,12 +1,12 @@
 /*global pyfy,Derived*/
 
-pyfy.Neg = Neg;
+pyfy.neg = function(parent) {
+  return new Neg()
+    .set("parent",parent);
+};
 
-function Neg(parent) {
-  if (!(this instanceof Neg))
-    return new Neg(parent);
+function Neg() {
   Base.call(this);
-  this.args.parent = parent;
 }
 
 Neg.prototype = new Base();

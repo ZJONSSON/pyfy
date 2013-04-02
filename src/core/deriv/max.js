@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
 
-pyfy.max = Max;
+pyfy.max = function(parent,max) {
+  return new Max()
+    .set("parent",parent)
+    .set("max",max);
+};
 
-function Max(parent,max) {
-	if (!(this instanceof Max))
-    return new Max(parent,max);
+function Max() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.max = max || 0;
 }
 
 Max.prototype = new Base();

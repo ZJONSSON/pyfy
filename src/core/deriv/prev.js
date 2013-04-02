@@ -1,13 +1,13 @@
 /*global pyfy,Derived*/
 
-pyfy.prev = Prev;
+pyfy.prev = function(parent,start) {
+  return new Prev()
+    .set("parent",parent)
+    .set("start",start || 0);
+};
 
-function Prev(parent,start) {
-  if (!(this instanceof Prev))
-    return new Prev(parent,start);
+function Prev() {
   Base.call(this);
-  this.args.parent = parent;
-  this.args.start = start || 0;
 }
 
 Prev.prototype = new Base();

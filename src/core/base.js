@@ -34,9 +34,9 @@ Base.prototype.fn = function() {
 Base.prototype.rawDates = undefined;
 
 // Allow derived object by chaining
-[Cumul,Diff,Prev,Max,Min,Neg,Calendar,Dcf,Period,TimeDiff,Call,Put,LogNorm].forEach(function(Fn) {
-  Base.prototype[Fn.name.toLowerCase()] = function(a,b,c) {
-    return new Fn(this,a,b,c);
+["cumul","diff","prev","max","min","neg","calendar","dcf","period","timeDiff","call","put","logNorm"].forEach(function(fn) {
+  Base.prototype[fn] = function(a,b,c) {
+    return pyfy[fn](this,a,b,c);
   };
 });
 

@@ -1,13 +1,11 @@
 /*global pyfy,Derived*/
 
-pyfy.cumul = Cumul;
+pyfy.cumul = function(parent) {
+  return new Cumul()
+    .set("parent",parent);
+};
 
-function Cumul(parent) {
-  if (!(this instanceof Cumul))
-    return new Base(parent);
-  Base.call(this);
-  this.args.parent = parent;
-}
+function Cumul() { Base.call(this); }
 
 Cumul.prototype = new Base();
 
