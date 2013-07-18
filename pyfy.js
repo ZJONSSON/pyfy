@@ -82,20 +82,12 @@
     var y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
     return pyfy.calendar.weekday(date) && pyfy.calendar.easter(date, [ +1, -2, -3, +39, 50 ]) && !(m == 5 && d == 17) && !(m === 0 && d == 1) && !(m == 11 && (d == 26 || d == 25)) && !(m == 4 && d == 1) && !(m == 7 && date - pyfy.util.nextWeekday(new Date(y, 7, 1), 1) === 0) && !(m == 3 && date - pyfy.util.nextWeekday(new Date(y, 3, 19), 4) === 0);
   };
-  pyfy.Query = Query;
-  pyfy.query = function(id, query) {
-    query = query || new Query();
-    if (id) {
-      query.cache[id] = query.cache[id] || {
-        values: {}
-      };
-      query.cache[id].values = query.cache[id].values || {};
-    }
-    return query;
-  };
-  function Query() {
-    if (!(this instanceof Query)) return new Query();
-    this.cache = {};
+  pyfy.query = Query;
+  function Query(options) {
+    if (!(this instanceof Query)) return new Query(options);
+    this.cache = {
+      options: options
+    };
   }
   Query.prototype.initCache = function(obj) {
     if (!obj.ID) return false;
@@ -106,6 +98,7 @@
     }, this);
     if (clear) {
       this.cache[obj.ID] = {
+        obj: obj,
         values: {},
         version: obj.version
       };
@@ -118,7 +111,6 @@
   };
   Query.prototype.dates = function(obj) {
     var cache = this.getCache(obj);
-    if (!cache) return [];
     if (!cache.dates) {
       var rawDates = this.rawDates(obj), dates = cache.dates = [];
       for (var date in rawDates) {
@@ -135,7 +127,7 @@
       if (obj.args) Object.keys(obj.args).forEach(function(key) {
         rawDates = this.rawDates(obj.args[key], rawDates);
       }, this);
-      if (obj.rawDates) rawDates = obj.rawDates(rawDates);
+      if (obj.rawDates) rawDates = obj.rawDates(rawDates, this);
     }
     return rawDates;
   };
@@ -158,6 +150,7 @@
     }, this);
   };
   Query.prototype.get = function(obj, d) {
+    this.initCache(obj);
     if (!d) d = this.dates(obj);
     return [].concat(d).map(function(d) {
       return this.fetch(obj, d.valueOf());
@@ -165,7 +158,7 @@
   };
   Query.prototype.fetch = function(obj, d) {
     if (!isNaN(obj)) return obj;
-    var values = this.getCache(obj).values;
+    var values = this.cache[obj.ID].values;
     if (values[d] === undefined) {
       var fn = obj.fn(this, d.valueOf());
       if (fn !== undefined) values[d] = fn;
@@ -188,7 +181,7 @@
     return 0;
   };
   Base.prototype.rawDates = undefined;
-  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived ].forEach(function(Fn) {
+  [ Cumul, Diff, Prev, Max, Min, Neg, Calendar, Dcf, Period, Derived, TimeDiff, Call, Put, LogNorm ].forEach(function(Fn) {
     Base.prototype[Fn.name.toLowerCase()] = function(a, b, c) {
       return new Fn(this, a, b, c);
     };
@@ -238,10 +231,10 @@
     }, this);
   }
   Sum.prototype = new Base();
-  Sum.prototype.fn = function(query, d) {
+  Sum.prototype.fn = function(query, d, i) {
     var sum = 0;
     Object.keys(this.args).forEach(function(key) {
-      sum += query.fetch(this.args[key], d);
+      sum += query.fetch(this.args[key], d, i);
     }, this);
     return sum;
   };
@@ -250,14 +243,14 @@
     if (!(this instanceof Data)) return new Data(data, options);
     Base.apply(this, arguments);
     this.args.data = {};
-    this._dates = [];
     if (data) this.update(data);
   }
   Data.prototype = new Base();
-  Data.prototype.rawDates = function(rawDates) {
+  Data.prototype.rawDates = function(rawDates, query) {
+    var settle = query && query.options && query.options.settle || new Date();
     rawDates = rawDates || {};
-    this._dates.forEach(function(e) {
-      rawDates[e] = e;
+    Object.keys(this.args.data).forEach(function(e) {
+      rawDates[+e] = +e;
     });
     return rawDates;
   };
@@ -268,17 +261,10 @@
       this.args.data[x] = a;
     } else {
       [].concat(a).forEach(function(d) {
-        this.args.data[d.x.valueOf()] = d.y;
+        this.args.data[(d.x || d[0]).valueOf()] = d.y || d[1];
       }, this);
     }
-    this._dates = Object.keys(this.args.data).map(function(key) {
-      return +key;
-    }).sort(ascending);
     return this;
-  };
-  Data.prototype.set = function(a) {
-    this.args.data = {};
-    return this.update(a);
   };
   Data.prototype.fn = function(query, d) {
     if (!Object.keys(this.args.data).length) return 0;
@@ -344,8 +330,8 @@
     this.args.parent = d || new Base();
   }
   Derived.prototype = new Base();
-  Derived.prototype.fn = function(query, d) {
-    return query.fetch(this.args.parent, d);
+  Derived.prototype.fn = function(query, d, i) {
+    return query.fetch(this.args.parent, d, i);
   };
   Derived.prototype.setParent = function(d) {
     this.args.parent = d;
@@ -366,8 +352,8 @@
     }, this);
     return res;
   };
-  Period.prototype.fn = function(query, d) {
-    return d >= this.args.start && d <= this.args.fin ? query.fetch(this.args.parent, d) : 0;
+  Period.prototype.fn = function(query, d, i) {
+    return d >= this.args.start && d <= this.args.fin ? query.fetch(this.args.parent, d, i) : 0;
   };
   pyfy.prev = Prev;
   function Prev(d, start) {
@@ -376,9 +362,9 @@
     this.default = start || 0;
   }
   Prev.prototype = new Derived();
-  Prev.prototype.fn = function(query, d) {
+  Prev.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
-    return datePos > 0 ? query.fetch(this.args.parent, dates[datePos - 1]) : this.default;
+    return datePos > 0 ? query.fetch(this.args.parent, dates[datePos - 1], i) : this.default;
   };
   pyfy.cumul = Cumul;
   function Cumul(d) {
@@ -386,9 +372,9 @@
     Derived.call(this, d);
   }
   Cumul.prototype = new Derived();
-  Cumul.prototype.fn = function(query, d) {
+  Cumul.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
-    return query.fetch(this.args.parent, d) + (datePos ? query.fetch(this, dates[datePos - 1]) : 0);
+    return query.fetch(this.args.parent, d, i) + (datePos ? query.fetch(this, dates[datePos - 1], i) : 0);
   };
   pyfy.diff = Diff;
   function Diff(d) {
@@ -396,9 +382,9 @@
     Derived.call(this, d);
   }
   Diff.prototype = new Derived();
-  Diff.prototype.fn = function(query, d) {
+  Diff.prototype.fn = function(query, d, i) {
     var dates = query.dates(this), datePos = pyfy.util.bisect(dates, d);
-    return datePos ? query.fetch(this.args.parent, d) - query.fetch(this.args.parent, dates[datePos - 1]) : 0;
+    return datePos ? query.fetch(this.args.parent, d, i) - query.fetch(this.args.parent, dates[datePos - 1], i) : 0;
   };
   pyfy.max = Max;
   function Max(d, max) {
@@ -407,18 +393,18 @@
     this.args.max = max || 0;
   }
   Max.prototype = new Derived();
-  Max.prototype.fn = function(query, d) {
-    return Math.max(query.fetch(this.args.parent, d), this.args.max);
+  Max.prototype.fn = function(query, d, i) {
+    return Math.max(query.fetch(this.args.parent, d, i), this.args.max);
   };
   pyfy.min = Min;
   function Min(d, min) {
-    if (!(this instanceof Min)) return new Min();
+    if (!(this instanceof Min)) return new Min(d, min);
     Derived.call(this, d);
     this.args.min = min || 0;
   }
   Min.prototype = new Derived();
-  Min.prototype.fn = function(query, d) {
-    return Math.min(query.fetch(this.args.parent, d), this.args.min);
+  Min.prototype.fn = function(query, d, i) {
+    return Math.min(query.fetch(this.args.parent, d, i), this.args.min);
   };
   pyfy.Neg = Neg;
   function Neg(d) {
@@ -426,8 +412,8 @@
     Derived.call(this, d);
   }
   Neg.prototype = new Derived();
-  Neg.prototype.fn = function(query, d) {
-    return -query.fetch(this.args.parent, d);
+  Neg.prototype.fn = function(query, d, i) {
+    return -query.fetch(this.args.parent, d, i);
   };
   pyfy.acct = Acct;
   function Acct(d) {
@@ -436,11 +422,31 @@
     this.args.start = d || 0;
   }
   Acct.prototype = new Derived();
-  Acct.prototype.fn = function(query, d) {
+  Acct.prototype.fn = function(query, d, i) {
     var dates = query.dates(this.args.parent), pos = pyfy.util.bisect(dates, d);
     if (pos < 1) return this.start;
-    if (dates[pos] == d) return query.fetch(this, dates[pos - 1]) + query.fetch(this.args.parent, d);
-    return query.fetch(this, dates[pos - 1]);
+    if (dates[pos] == d) return query.fetch(this, dates[pos - 1], i) + query.fetch(this.args.parent, d, i);
+    return query.fetch(this, dates[pos - 1], i);
+  };
+  pyfy.call = Call;
+  function Call(d, strike) {
+    if (!(this instanceof Call)) return new Call(d);
+    Derived.call(this, d);
+    this.args.strike = strike || 0;
+  }
+  Call.prototype = new Derived();
+  Call.prototype.fn = function(query, d, i) {
+    return Math.max(query.fetch(this.args.parent, d, i) - this.args.strike, 0);
+  };
+  pyfy.call = Put;
+  function Put(d, strike) {
+    if (!(this instanceof Call)) return new Put(d);
+    Derived.call(this, d);
+    this.args.strike = strike || 0;
+  }
+  Put.prototype = new Derived();
+  Put.prototype.fn = function(query, d, i) {
+    return Math.max(this.args.strike - query.fetch(this.args.parent, d, i), 0);
   };
   pyfy.Calendar = Calendar;
   function Calendar(d, calendar) {
@@ -449,31 +455,37 @@
     this.args.calendar = calendar || pyfy.calendar.weekday;
   }
   Calendar.prototype = new Derived();
-  Calendar.prototype.rawDates = function(query) {
-    query = pyfy.query(this.ID, query);
-    var cache = query.cache[this.ID];
-    cache.dateMap = {};
-    cache.rawDates = {};
-    for (var pd in this.args.parent.rawDates(query)) {
-      var date = new Date(+pd), calendar = [].concat(this.args.calendar), i = 0;
-      while (!calendar.every(function(d) {
+  Calendar.prototype.checkDate = function(date) {
+    date = new Date(date);
+    var calendar = [].concat(this.calendar), i = 0;
+    function isHoliday() {
+      return !calendar.every(function(d) {
         var fn = typeof d === "string" ? pyfy.calendar[d] : d;
         return fn(date);
-      }, this)) {
-        date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-        if (i++ > 31) throw "Calendar function always returns false";
-      }
-      date = date.valueOf();
-      cache.rawDates[date] = +date;
+      }, this);
+    }
+    function nextDay() {
+      date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+      if (i++ > 31) throw "Calendar function always returns false";
+    }
+    while (isHoliday()) nextDay();
+    return date.valueOf();
+  };
+  Calendar.prototype.rawDates = function(rawDates, query) {
+    var cache = query.cache[this.ID];
+    rawDates = {};
+    cache.dateMap = {};
+    for (var pd in this.args.parent.rawDates()) {
+      var date = this.checkDate(+pd);
+      rawDates[date] = +date;
       cache.dateMap[date] = +pd;
     }
-    return cache.rawDates;
+    return rawDates;
   };
   Calendar.prototype.fn = function(query, d) {
     var cache = query.cache[this.ID];
     return query.fetch(this.args.parent, cache.dateMap[d] || this.calendar(d));
   };
-  Calendar.prototype.calendar = pyfy.calendar.weekday;
   pyfy.operator = pyfy.Operator = Operator;
   var ops = {
     add: function(a, b) {
@@ -505,11 +517,11 @@
     this.op = op;
   }
   Operator.prototype = new Base();
-  Operator.prototype.fn = function(query, d) {
+  Operator.prototype.fn = function(query, d, i) {
     var left, right;
-    right = query.fetch(this.args.right, d);
+    right = query.fetch(this.args.right, d, i);
     if (!right && this.op == "mul") return 0;
-    left = query.fetch(this.args.left, d);
+    left = query.fetch(this.args.left, d, i);
     return ops[this.op](left, right);
   };
   pyfy.daycount = pyfy.daycount || {};
@@ -557,7 +569,7 @@
       cache.values = {};
       dates.slice(1).forEach(function(d, i) {
         var d1 = pyfy.util.dateParts(dates[i]), d2 = pyfy.util.dateParts(d);
-        cache.values[d] = dates[i] ? this.daycount(d1, d2) * query.fetch(this.args.parent, d) : 0;
+        cache.values[d] = dates[i] ? this.daycount(d1, d2) : 0;
       }, this);
     }
     return cache.values[d] || 0;
@@ -566,6 +578,22 @@
   Dcf.prototype.setDaycount = function(d) {
     this.daycount = typeof d === "string" ? pyfy.daycount[d] : d;
     return this;
+  };
+  pyfy.timeDiff = TimeDiff;
+  function TimeDiff(parent, date, daycount) {
+    if (!(this instanceof TimeDiff)) return new TimeDiff(parent, date, daycount);
+    Derived.call(this, parent);
+    this.args.daycount = daycount || pyfy.daycount.d_30_360;
+    this.args.date = date || new Date();
+  }
+  TimeDiff.prototype = new Derived();
+  TimeDiff.prototype.fn = function(query, d) {
+    var date = this.args.date;
+    if (typeof date === "string") {
+      var parentDates = query.dates(this.args.parent);
+      date = new Date(date.slice(0, 1).toUpperCase() === "L" ? parentDates[parentDates.length - 1] : parentDates[0]);
+    }
+    return Math.abs(this.args.daycount(pyfy.util.dateParts(date), pyfy.util.dateParts(new Date(d))));
   };
   pyfy.ir = Ir;
   function Ir(data, options) {
@@ -590,13 +618,13 @@
     this.args.val = val;
   }
   Df.prototype = new Dcf();
-  Df.prototype.fn = function(query, d) {
+  Df.prototype.fn = function(query, d, i) {
     var dates = query.dates(this);
     var pos = pyfy.util.bisect(dates, d);
     var last = dates[pos - 1];
     if (!last) return d == dates[pos] ? 1 : 0;
     var dcf = this.parent.daycount(pyfy.util.dateParts(last), pyfy.util.dateParts(d));
-    return query.fetch(this, last) * Math.exp(-query.fetch(this.args.parent, d) * dcf);
+    return query.fetch(this, last, i) * Math.exp(-query.fetch(this.args.parent, d, i) * dcf);
   };
   pyfy.bond = Bond;
   function Bond(start, dm, num, rate, notional, daycount) {
@@ -705,7 +733,13 @@
   pyfy.random = Random;
   Random.prototype = new Base();
   Random.prototype.fn = function() {
-    return Math.random() * 2 - 1 + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
+    var x, y, r;
+    do {
+      x = Math.random() * 2 - 1;
+      y = Math.random() * 2 - 1;
+      r = x * x + y * y;
+    } while (!r || r > 1);
+    return x * Math.sqrt(-2 * Math.log(r) / r);
   };
   Random.prototype.correl = function(correl) {
     return pyfy.correl(this, correl);
@@ -776,30 +810,66 @@
   Wiener.prototype.dates = function(query) {
     return query ? query.cache[this.ID].dates.all : [];
   };
-  pyfy.logNorm = function(s, vol, r) {
-    return new Norm(s, vol, r);
-  };
-  function LogNorm(s, r, vol) {
-    if (!(this instanceof LogNorm)) return new LogNorm(s, r, vol);
-    Wiener.apply(this);
-    this.s = s || 0;
-    this.r = r || 0;
-    this.vol = vol || 0;
+  "use strict";
+  pyfy.logNorm = LogNorm;
+  function LogNorm(spot, vol, drift, random) {
+    if (!(this instanceof LogNorm)) return new LogNorm(spot, vol, drift, random);
+    Base.apply(this);
+    this.args.spot = spot;
+    this.args.vol = vol;
+    this.args.drift = drift;
+    this.args.random = random || new Random();
   }
-  LogNorm.prototype = new Wiener();
-  LogNorm.prototype.inputs = function() {
-    return [ this.s, this.r, this.vol ];
-  };
-  LogNorm.prototype.fn = function(query, d) {
-    if (query.cache[this.ID].values.length == 0) {
-      var d0 = new Date();
-      query.cache[this.ID].values[d0] = s;
-      query.fetch(this.parent, d0);
+  LogNorm.prototype = new Base();
+  LogNorm.prototype.fn = function(query, d, i) {
+    var cache = query.cache[this.ID];
+    i = i || 0;
+    if (!cache.extent) {
+      var spotDates = query.dates(this.args.spot);
+      if (spotDates.length) {
+        cache.extent = {
+          first: spotDates[0],
+          last: spotDates[spotDates.length - 1]
+        };
+      } else {
+        throw "no date information in spot";
+      }
     }
-    return vol * Math.sqrt(dt) * query.fetch(this.parent, d);
-    var dt = (cache.dates[i] - (cache.dates[i - 1] || cache.dates[0])) / 365, s = i > 0 ? this.fetch(cache, d, i - 1) : this.s, r = fetch(this.r, cache, d, i), vol = fetch(this.vol, cache, d, i), e = (r - Math.pow(vol, 2) / 2) * dt + vol * Math.sqrt(dt) * rndNorm();
-    return s * Math.exp(e);
+    var res = query.fetch(this.args.spot, d, i);
+    if (res) return res;
+    var dates = query.dates(this), l = dates.length, datePos = pyfy.util.bisect(cache.dates, d), prev, next, drift, rnd, dt, vol;
+    var pd = d < cache.extent.first ? dates[datePos] : d;
+    vol = query.fetch(this.args.vol, pd, i);
+    rnd = query.fetch(this.args.random, pd, i);
+    drift = query.fetch(this.args.drift, pd, i);
+    dt = d < cache.extent.first ? dates[datePos] - d : d - dates[datePos - 1];
+    dt = dt / pyfy.util.DAYMS / 365.25;
+    if (d > cache.extent.last) {
+      prev = query.fetch(this, dates[datePos - 1], i);
+      if (!i) {
+        dates.push(d);
+        cache.extent.last = d;
+      }
+      return prev * pyfy_exp(vol, drift, rnd, dt);
+    } else if (d < cache.extent.first) {
+      next = query.fetch(this, dates[datePos], i);
+      if (!i) {
+        dates.splice(0, 0, d);
+        cache.extent.first = d;
+      }
+      console.log(next, vol, drift, rnd, dt);
+      return next / pyfy_exp(vol, drift, rnd, dt);
+    } else {
+      prev = query.fetch(this, dates[datePos - 1], i);
+      next = query.fetch(this, dates[datePos], i);
+      drift = Math.log(next / prev) / ((dates[datePos] - dates[datePos - 1]) / pyfy.util.DAYMS / 365.25);
+      if (!i) dates.splice(datePos, 0, d);
+      return prev * pyfy_exp(vol, drift, rnd, dt);
+    }
   };
+  function pyfy_exp(vol, drift, rnd, dt) {
+    return Math.exp((drift - vol * vol / 2) * dt + rnd * vol * Math.sqrt(dt));
+  }
   function Correl(parent, correl, random) {
     if (!(this instanceof Correl)) return new Correl(parent, correl);
     Random.call(this);
@@ -809,34 +879,33 @@
   }
   pyfy.correl = Correl;
   Correl.prototype = new Random();
-  Correl.prototype.fn = function(query, d) {
-    var correl = query.fetch(this.args.correl, d);
-    return correl * query.fetch(this.args.parent, d) + Math.sqrt(1 - correl * correl) * query.fetch(this.args.random, d);
+  Correl.prototype.fn = function(query, d, i) {
+    var correl = query.fetch(this.args.correl, d, i);
+    return correl * query.fetch(this.args.parent, d, i) + Math.sqrt(1 - correl * correl) * query.fetch(this.args.random, d, i);
   };
-  function Simul(count) {
-    if (!(this instanceof Simul)) return new Simul(count);
-    this.queries = [];
-    while (count--) {
-      this.queries.push(pyfy.query());
-    }
-  }
   pyfy.simul = Simul;
-  [ "y", "val" ].forEach(function(fn) {
-    Simul.prototype[fn] = function(obj, dates) {
-      return this.queries.map(function(q) {
-        return q[fn](obj, dates);
-      });
-    };
-  });
-  Simul.prototype.mean = function(obj, dates) {
-    var res = this.y(obj, dates), l = res.length;
-    res = res[0].map(function(d, i) {
-      var sum = 0;
-      res.forEach(function(d) {
-        sum += d[i];
-      });
-      return sum / l;
-    });
-    return res.length == 1 ? res[0] : res;
+  function Simul(num) {
+    if (!(this instanceof Simul)) return new Simul(num);
+    Query.call(this);
+    this.num = num;
+  }
+  Simul.prototype = new Query();
+  Simul.prototype.fetch = function(obj, d, i) {
+    if (!isNaN(obj)) return obj;
+    var values = this.cache[obj.ID].values;
+    values[d] = values[d] || [];
+    if (values[d][i] === undefined) {
+      var fn = obj.fn(this, d.valueOf(), i);
+      if (fn !== undefined) values[d][i] = fn;
+    }
+    return values[d][i];
+  };
+  Simul.prototype.get = function(obj, dates) {
+    this.initCache(obj);
+    return [].concat(dates || this.dates(obj)).map(function(d) {
+      var res = [], i = this.num;
+      while (i--) res.push(this.fetch(obj, d.valueOf(), i));
+      return res;
+    }, this);
   };
 })();
