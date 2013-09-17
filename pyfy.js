@@ -1173,7 +1173,7 @@ Wiener.prototype.dates = function(query) {
 /*global pyfy,Base,Random*/
 "use strict";
 pyfy.logNorm = function(spot,vol,drift,random) {
-  return new Base()
+  return new LogNorm()
     .set("spot",spot)
     .set("vol",vol)
     .set("drift",drift)
