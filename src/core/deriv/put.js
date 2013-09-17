@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("put");
 
 pyfy.put = function(parent,strike) {
   return new Put()

@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("min");
 
 pyfy.min = function(parent,min) {
   return new Min()

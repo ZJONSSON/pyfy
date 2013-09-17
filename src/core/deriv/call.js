@@ -1,3 +1,4 @@
+Base.register("call");
 
 pyfy.call = function(parent,strike) {
   return new Call()

@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("period");
 
 pyfy.period = function(parent,start,finish) {
   return new Period()

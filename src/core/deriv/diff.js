@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("diff");
 
 pyfy.diff = function(parent) {
   return new Diff()

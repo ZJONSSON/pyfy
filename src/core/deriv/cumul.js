@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("cumul");
 
 pyfy.cumul = function(parent) {
   return new Cumul()

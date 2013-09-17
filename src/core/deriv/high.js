@@ -1,4 +1,5 @@
 /*global pyfy,Base */
+Base.register("high");
 
 pyfy.high = function(parent) {
   return new High()

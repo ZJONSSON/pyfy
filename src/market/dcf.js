@@ -1,4 +1,6 @@
 /*global pyfy,Derived,Operator*/
+Base.register("dcf");
+
 pyfy.dcf = function(parent,daycount) {
   return new Dcf()
     .set("parent",parent)

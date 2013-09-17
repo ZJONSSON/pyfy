@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("calendar");
 
 pyfy.Calendar = function(parent,calendar) {
   return new Calendar()

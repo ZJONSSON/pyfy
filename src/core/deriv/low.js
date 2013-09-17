@@ -1,4 +1,5 @@
 /*global pyfy,Base */
+Base.register("low");
 
 pyfy.low = function(parent) {
   return new Low()

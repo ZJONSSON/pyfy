@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("neg");
 
 pyfy.neg = function(parent) {
   return new Neg()

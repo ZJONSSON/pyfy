@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("max");
 
 pyfy.max = function(parent,max) {
   return new Max()

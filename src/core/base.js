@@ -33,12 +33,11 @@ Base.prototype.fn = function() {
 // Placeholder
 Base.prototype.rawDates = undefined;
 
-// Allow derived object by chaining
-["cumul","diff","prev","max","min","neg","high","low","calendar","dcf","period","timeDiff","call","put","logNorm"].forEach(function(fn) {
+Base.register = function(fn) {
   Base.prototype[fn] = function(a,b,c) {
     return pyfy[fn](this,a,b,c);
-  };
-});
+  }
+};
 
 Base.prototype.pv= function(curve) {
   var pv = 0;

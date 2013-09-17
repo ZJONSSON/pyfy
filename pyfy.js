@@ -94,12 +94,11 @@ Base.prototype.fn = function() {
 // Placeholder
 Base.prototype.rawDates = undefined;
 
-// Allow derived object by chaining
-["cumul","diff","prev","max","min","neg","high","low","calendar","dcf","period","timeDiff","call","put","logNorm"].forEach(function(fn) {
+Base.register = function(fn) {
   Base.prototype[fn] = function(a,b,c) {
     return pyfy[fn](this,a,b,c);
-  };
-});
+  }
+};
 
 Base.prototype.pv= function(curve) {
   var pv = 0;
@@ -401,6 +400,7 @@ pyfy.interval = function(start,dm,no,val) {
   return pyfy.flow(interval);
 };
 /*global pyfy,Derived*/
+Base.register("period");
 
 pyfy.period = function(parent,start,finish) {
   return new Period()
@@ -429,6 +429,7 @@ Period.prototype.fn = function(query,d,i) {
   return (d >= this.args.start && d<= this.args.finish) ? query.fetch(this.args.parent,d,i) : 0;
 };
 /*global pyfy,Derived*/
+Base.register("prev");
 
 pyfy.prev = function(parent,start) {
   return new Prev()
@@ -448,6 +449,7 @@ Prev.prototype.fn = function(query,d,i) {
   return (datePos > 0) ? query.fetch(this.args.parent,dates[datePos-1],i) : this.args.start;
 };
 /*global pyfy,Derived*/
+Base.register("cumul");
 
 pyfy.cumul = function(parent) {
   return new Cumul()
@@ -464,6 +466,7 @@ Cumul.prototype.fn = function(query,d,i) {
   return query.fetch(this.args.parent,d,i) + (datePos ? query.fetch(this,dates[datePos-1],i) : 0);
 };
 /*global pyfy,Derived*/
+Base.register("diff");
 
 pyfy.diff = function(parent) {
   return new Diff()
@@ -483,6 +486,7 @@ Diff.prototype.fn = function(query,d,i) {
   return (datePos) ? query.fetch(this.args.parent,d,i) - query.fetch(this.args.parent,dates[datePos-1],i) : 0;
 };
 /*global pyfy,Base */
+Base.register("high");
 
 pyfy.high = function(parent) {
   return new High()
@@ -502,6 +506,7 @@ High.prototype.fn = function(query,d,i) {
   return Math.max(query.fetch(this.args.parent,d,i),  (datePos ? query.fetch(this,dates[datePos-1],i) : 0));
 };
 /*global pyfy,Base */
+Base.register("low");
 
 pyfy.low = function(parent) {
   return new Low()
@@ -521,6 +526,7 @@ Low.prototype.fn = function(query,d,i) {
   return Math.min(query.fetch(this.args.parent,d,i),  (datePos ? query.fetch(this,dates[datePos-1],i) : Infinity));
 };
 /*global pyfy,Derived*/
+Base.register("max");
 
 pyfy.max = function(parent,max) {
   return new Max()
@@ -538,6 +544,7 @@ Max.prototype.fn = function(query,d,i) {
   return Math.max(query.fetch(this.args.parent,d,i),this.args.max) ;
 };
 /*global pyfy,Derived*/
+Base.register("min");
 
 pyfy.min = function(parent,min) {
   return new Min()
@@ -555,6 +562,7 @@ Min.prototype.fn = function(query,d,i) {
   return Math.min(query.fetch(this.args.parent,d,i),this.args.min);
 };
 /*global pyfy,Derived*/
+Base.register("neg");
 
 pyfy.neg = function(parent) {
   return new Neg()
@@ -571,6 +579,7 @@ Neg.prototype.fn = function(query,d,i) {
   return -query.fetch(this.args.parent,d,i);
 };
 /*global pyfy,Derived*/
+Base.register("acct");
 
 pyfy.acct = function(parent,start) {
   return new Acct()
@@ -592,6 +601,7 @@ Acct.prototype.fn = function(query,d,i) {
   if (dates[pos] == d) return query.fetch(this,dates[pos-1],i) + query.fetch(this.args.parent,d,i);
   return query.fetch(this,dates[pos-1],i);
 };
+Base.register("call");
 
 pyfy.call = function(parent,strike) {
   return new Call()
@@ -609,6 +619,7 @@ Call.prototype.fn = function(query,d,i) {
   return Math.max(query.fetch(this.args.parent,d,i)-this.args.strike,0) ;
 };
 /*global pyfy,Derived*/
+Base.register("put");
 
 pyfy.put = function(parent,strike) {
   return new Put()
@@ -626,6 +637,7 @@ Put.prototype.fn = function(query,d,i) {
   return Math.max(this.args.strike - query.fetch(this.args.parent,d,i),0) ;
 };
 /*global pyfy,Derived*/
+Base.register("calendar");
 
 pyfy.Calendar = function(parent,calendar) {
   return new Calendar()
@@ -831,6 +843,8 @@ pyfy.calendar.is = function(date) {
 
 };
 /*global pyfy,Derived,Operator*/
+Base.register("dcf");
+
 pyfy.dcf = function(parent,daycount) {
   return new Dcf()
     .set("parent",parent)

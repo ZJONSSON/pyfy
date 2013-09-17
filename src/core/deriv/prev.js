@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("prev");
 
 pyfy.prev = function(parent,start) {
   return new Prev()

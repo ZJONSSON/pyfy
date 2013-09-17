@@ -1,4 +1,5 @@
 /*global pyfy,Derived*/
+Base.register("acct");
 
 pyfy.acct = function(parent,start) {
   return new Acct()
