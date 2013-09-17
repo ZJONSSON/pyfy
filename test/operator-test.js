@@ -29,8 +29,15 @@ suite.addBatch({
   },
   "div" : function() {
     assert.deepEqual(fa.div(fb).y(),[0,10,Infinity,0,-Infinity,0]);
+  },
+  "lt": function() {
+    assert.deepEqual(fa.lt(100).y(),[0,0,1]);
+    assert.deepEqual(sb.lt(40).y(),[1,1,0,0]);
+  },
+  "gt": function() {
+    assert.deepEqual(fa.gt(100).y(),[0,1,0]);
+    assert.deepEqual(sb.gt(40).y(),[0,0,1,1]);
   }
-
 });
 
 suite.export(module);
