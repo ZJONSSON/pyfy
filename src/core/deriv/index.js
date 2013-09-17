@@ -2,6 +2,8 @@ import "period";
 import "prev";
 import "cumul";
 import "diff";
+import "high";
+import "low";
 import "max";
 import "min";
 import "neg";
