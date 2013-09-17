@@ -1,16 +1,15 @@
 /*global pyfy,Base*/
 
-pyfy.sum = Sum;
+pyfy.sum = function() {
+  var sum = new Sum();
+  Array.prototype.slice.call(arguments).forEach(function(d,i) {
+    sum.args[i] = d;
+  })
+  return sum;
+};
 
-// Quick hack with variables, as we can not apply to "new"
-function Sum(a,b,c,d,e,f,g,h) {
-  if (!(this instanceof Sum))
-    return new Sum(a,b,c,d,e,f,g,h);
+function Sum() {
   Base.call(this);
-
-  Array.prototype.slice.call(arguments).map(function(d,i) {
-    if (d) this.args[i] = d;
-  },this);
 }
 
 Sum.prototype = new Base();
